@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include <WORD_INDEX_H.h>
+#include "WORD_INDEXER_H.h"
 
 using namespace std;
 
@@ -20,8 +20,10 @@ int main()
 	string rootDirectory = "rootdirectory"; 
 	Index index(rootDirectory);
 	index.Build();
+	char again;
 	do 
 	{
+		string word;
 
 		//word = getInput(); 
 		cout << "Enter word: " ; 

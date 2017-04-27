@@ -53,6 +53,8 @@ private:
 	vector<string> GetInstancesOfWordInFile(string filePath, vector<int> positions);		//returns all instances of word in filePath
 	
 	void MakeLower(string& word);
+	
+	bool hasEnding (string const &fullString, string const &ending);
 
 	string dirRoot;
 	string path;

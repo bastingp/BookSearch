@@ -72,7 +72,7 @@ void Index::Build()
 	// infile.close();
 }
 
-void ProcessDirectory(string directory)
+void Index::ProcessDirectory(string directory)
 {
 	string dirToOpen = path + directory;
 	DIR *dir;
@@ -100,7 +100,7 @@ void ProcessDirectory(string directory)
 	closedir(dir);
 }
 
-void ProcessEntity(struct dirent* entity)
+void Index::ProcessEntity(struct dirent* entity)
 {
 	//find entity type
 	if(entity->d_type == DT_DIR) 	//it's a directory
@@ -125,9 +125,11 @@ void ProcessEntity(struct dirent* entity)
 	cout << "Not a file or directory: " << entity->d_name << endl;
 }
 
-void ProcessFile(string file)
+void Index::ProcessFile(string file)
 {
 	string fileType = ".txt";
+	ifstream infile;
+	string line, word;
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
 		bookIDRef.push_back(path + file);
@@ -236,5 +238,18 @@ void Index::MakeLower(string& word)
 	for(int i = 0; i < word.length(); i++)
 	{
 		word[i] = tolower(word[i]);
+	}
+}
+
+bool Index::hasEnding(string const &fullString, string const &ending) 
+{
+	if (fullString.length() >= ending.length()) 
+	{
+		return (0 == fullString.compare (fullString.length() - ending.\
+						 length(), ending.length(), ending));
+	} 
+	else 
+	{
+		return false;
 	}
 }
