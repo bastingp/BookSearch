@@ -17,7 +17,7 @@ using namespace std;
 
 int main() 
 { 
-	string rootDirectory = "rootdirectory"; 
+	string rootDirectory = "/home/students/schutzj/FinalProject/Test/Books"; 
 	Index index(rootDirectory);
 	index.Build();
 	char again;
@@ -29,9 +29,14 @@ int main()
 		cout << "Enter word: " ; 
 		cin >> word; 
 		cout << endl; 
+		
+		stringstream iss;
 
 		vector<string>instancesSet = index.GetInstancesOf(word);
-
+	
+		iss << instancesSet.size();
+		
+		cout << "Number of entries: " << iss.str() << endl;
 
 		for (int i=0; i < instancesSet.size(); i++)
 		{

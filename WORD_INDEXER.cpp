@@ -130,6 +130,8 @@ void Index::ProcessFile(string file)
 	string fileType = ".txt";
 	ifstream infile;
 	string line, word;
+	stringstream iss;
+	cout << "\n\n********Processing file:*****************\n\n";
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
 		bookIDRef.push_back(path + file);
@@ -138,13 +140,15 @@ void Index::ProcessFile(string file)
 		while(!infile.fail())
 		{
 			getline(infile, line);
+			iss << pos;
+			cout << pos << ": " << line << endl;
 			istringstream iss(line);
 			while(iss >> word)
 			{
 				MakeLower(word);			//store word as lower
 				if(!index[word].empty())			//add to current WordLocations
 				{
-					index[word][0].locations.push_back(pos);			
+					index[word].locations.push_back(pos);			
 				}
 				else			//otherwise, no WordLocations stored, so one must be added 
 				{
@@ -176,6 +180,22 @@ vector<string> Index::GetInstancesOf(string word)
 		for(int i = 0; i < temp.size(); i++)		
 		{
 			lines.push_back(temp.at(i));			//and store it in lines
+		}
+	}
+	
+	cout << "\n\nIndex Class got the following lines: ";
+	for(int i = 0; i < lines.size(); i++)
+	{
+		cout << endl << lines[i];
+	}
+	cout << "\n\nAnd the following positions: ";
+	stringstream iss;
+	for(int i = 0; i < locations.size(); i++)
+	{
+		for(int j = 0; j < locations[i].locations.size(); j++)
+		{
+			iss << locations[i].locations[j];
+			cout << endl << iss.str();
 		}
 	}
 	
