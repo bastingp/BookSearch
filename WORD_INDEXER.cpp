@@ -40,33 +40,124 @@ void Index::Build()
 		return;
 	}
 	
-	bookIDRef.push_back(dirRoot);
-	CarefulOpenIn(infile, dirRoot);
-	int pos= 0;
-	while(!infile.fail())
-	{
-		getline(infile, line);
-		istringstream iss(line);
-		while(iss >> word)
-		{
-			MakeLower(word);			//store word as lower
-			if(!index[word].empty())			//add to current WordLocations
-			{
-				index[word][0].locations.push_back(pos);			
-			}
-			else			//otherwise, no WordLocations stored, so one must be added 
-			{
-				WordLocations loc;
-				loc.locations.push_back(pos);
-				index[word].push_back(loc);
-			}
+	path = dirRoot;			//begin the path at the directory root
+	ProcessDirectory("");		//process every file beginning at directory root
+	
+	// bookIDRef.push_back(dirRoot);
+	// CarefulOpenIn(infile, dirRoot);
+	// int pos= 0;
+	// while(!infile.fail())
+	// {
+		// getline(infile, line);
+		// istringstream iss(line);
+		// while(iss >> word)
+		// {
+			// MakeLower(word);			//store word as lower
+			// if(!index[word].empty())			//add to current WordLocations
+			// {
+				// index[word][0].locations.push_back(pos);			
+			// }
+			// else			//otherwise, no WordLocations stored, so one must be added 
+			// {
+				// WordLocations loc;
+				// loc.locations.push_back(pos);
+				// index[word].push_back(loc);
+			// }
 			
-		}
+		// }
 		
-		pos = infile.tellg();
+		// pos = infile.tellg();
+	// }
+	
+	// infile.close();
+}
+
+void ProcessDirectory(string directory)
+{
+	string dirToOpen = path + directory;
+	DIR *dir;
+	dir = opendir(dirToOpen.c_str());
+
+	//set the new path for the content of the directory
+	path = dirToOpen + "/";
+	if(NULL == dir)
+	{
+		cout << "could not open directory: " << dirToOpen.c_str() <<\
+		endl;
+		return;
+	}
+	struct dirent *entity;
+	entity = readdir(dir);
+
+	while(entity != NULL)
+	{
+		ProcessEntity(entity);
+		entity = readdir(dir);
+	}
+
+	//we finished with the directory so remove it from the path
+	path.resize(path.length() - 1 - directory.length());
+	closedir(dir);
+}
+
+void ProcessEntity(struct dirent* entity)
+{
+	//find entity type
+	if(entity->d_type == DT_DIR) 	//it's a directory
+	{
+		if(entity->d_name[0] == '.')		//don't process meta files!
+		{
+			return;
+		}
+		else	//it's a directory--send it to be processed
+		{
+			ProcessDirectory(string(entity->d_name));
+			return;
+		}
+	}
+
+	if(entity->d_type == DT_REG)		//it's a regular file
+	{
+		ProcessFile(string(entity->d_name));		//so send it to be processed
+		return;
 	}
 	
-	infile.close();
+	cout << "Not a file or directory: " << entity->d_name << endl;
+}
+
+void ProcessFile(string file)
+{
+	string fileType = ".txt";
+	if (hasEnding(file,fileType)) 		//Make sure it's a text file
+	{  
+		bookIDRef.push_back(path + file);
+		CarefulOpenIn(infile, (path + file));
+		int pos= 0;
+		while(!infile.fail())
+		{
+			getline(infile, line);
+			istringstream iss(line);
+			while(iss >> word)
+			{
+				MakeLower(word);			//store word as lower
+				if(!index[word].empty())			//add to current WordLocations
+				{
+					index[word][0].locations.push_back(pos);			
+				}
+				else			//otherwise, no WordLocations stored, so one must be added 
+				{
+					WordLocations loc;
+					loc.locations.push_back(pos);
+					index[word].push_back(loc);
+				}
+				
+			}
+			
+			pos = infile.tellg();
+		}
+		
+		infile.close();
+	}
 }
 
 vector<string> Index::GetInstancesOf(string word)

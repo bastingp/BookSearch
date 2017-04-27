@@ -12,6 +12,7 @@
 #include<cstdio>
 #include<sstream>
 #include<algorithm>
+#include<dirent.h>
 
 using namespace std;
 
@@ -39,6 +40,12 @@ public:
 	vector<string> GetInstancesOf(string word);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
 	
 private:
+	void ProcessDirectory(string directory);		//looks at every entity in a directory
+	
+	void ProcessEntity(struct dirent* entity);		//checks if the entity is a file or a directory 
+	
+	void ProcessFile(string file);					//reads through the file, and adds it to our index
+
 	void CarefulOpenIn(ifstream& infile, string name);		//opens file, exits program if attempt fails
 	
 	vector<WordLocations> GetLocations(string word);				//returns WordLocations of word in index--returns an empty WordLocations if word not in index
@@ -48,6 +55,7 @@ private:
 	void MakeLower(string& word);
 
 	string dirRoot;
+	string path;
 	map<string, vector<WordLocations> > index;
 	vector<string> bookIDRef;
 };
