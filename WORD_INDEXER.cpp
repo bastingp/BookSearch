@@ -75,8 +75,6 @@ vector<string> Index::GetInstancesOf(string word)
 
 	MakeLower(word);		//make sure word is normalized
 	locations = GetLocations(word);
-	stringstream iss;
-	iss << locations.size();
 
 	vector<string> lines;
 	for(int i = 0; i < locations.size(); i++)
@@ -96,8 +94,6 @@ vector<string> Index::GetInstancesOfWordInFile(string filePath, vector<int> posi
 	vector<string> lines;
 	ifstream infile;
 	CarefulOpenIn(infile, filePath);
-	stringstream iss;
-	iss << positions.size();
 	
 	string line, word;
 	int last_pos = -1;
