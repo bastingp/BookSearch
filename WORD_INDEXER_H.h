@@ -16,11 +16,11 @@
 
 using namespace std;
 
-struct WordLocations
+struct BookMap
 {
-	int bookID;
-	vector<int> locations;
+	map<unsigned short int, vector<int> > bookOffsets;
 };
+
 
 class Index
 {
@@ -48,7 +48,7 @@ private:
 
 	void CarefulOpenIn(ifstream& infile, string name);		//opens file, exits program if attempt fails
 	
-	vector<WordLocations> GetLocations(string word);				//returns WordLocations of word in index--returns an empty WordLocations if word not in index
+	BookMap GetLocations(string word);				//returns WordLocations of word in index--returns an empty WordLocations if word not in index
 	
 	vector<string> GetInstancesOfWordInFile(string filePath, vector<int> positions);		//returns all instances of word in filePath
 	
@@ -58,7 +58,7 @@ private:
 
 	string dirRoot;
 	string path;
-	map<string, vector<WordLocations> > index;
+	map<string, BookMap> index;
 	vector<string> bookIDRef;
 };
 
