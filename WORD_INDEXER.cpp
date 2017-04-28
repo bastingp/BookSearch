@@ -104,16 +104,17 @@ void Index::ProcessFile(string file)
 	string line, word;
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
-		bookIDRef.push_back(path + file);
+		bookIDRef.push_back(path + file);			//add the current file path to our bookIDRef vector
 		CarefulOpenIn(infile, (path + file));
 		int pos= 0;
-		while(!infile.fail())
+		while(!infile.fail())			//read through the whole file
 		{
-			getline(infile, line);
+			getline(infile, line);			//get each line
 			istringstream iss(line);
-			while(iss >> word)
+			while(iss >> word)				//read each word
 			{
 				MakeLower(word);			//store word as lower
+				
 				if(!index[word].empty())			//if we already have WordLocations stored for this word...
 				{
 					bool currentBookRefExists = false;
