@@ -42,34 +42,6 @@ void Index::Build()
 	
 	path = dirRoot;			//begin the path at the directory root
 	ProcessDirectory("");		//process every file beginning at directory root
-	
-	// bookIDRef.push_back(dirRoot);
-	// CarefulOpenIn(infile, dirRoot);
-	// int pos= 0;
-	// while(!infile.fail())
-	// {
-		// getline(infile, line);
-		// istringstream iss(line);
-		// while(iss >> word)
-		// {
-			// MakeLower(word);			//store word as lower
-			// if(!index[word].empty())			//add to current WordLocations
-			// {
-				// index[word][0].locations.push_back(pos);			
-			// }
-			// else			//otherwise, no WordLocations stored, so one must be added 
-			// {
-				// WordLocations loc;
-				// loc.locations.push_back(pos);
-				// index[word].push_back(loc);
-			// }
-			
-		// }
-		
-		// pos = infile.tellg();
-	// }
-	
-	// infile.close();
 }
 
 void Index::ProcessDirectory(string directory)
@@ -146,14 +118,31 @@ void Index::ProcessFile(string file)
 			while(iss >> word)
 			{
 				MakeLower(word);			//store word as lower
-				if(!index[word].empty())			//add to current WordLocations
+				if(!index[word].empty())			//if we already have WordLocations stored for this word...
 				{
-					index[word].locations.push_back(pos);			
+					bool currentBookRefExists = false;
+					for(int i = 0; i < index[word].size(); i++)		//we need to check every WordLocation pairing
+					{
+						if(index[word][i].bookID == (bookIDRef.size() - 1))		//if we have already stored a pairing for the book we're in
+						{
+							index[word][i].locations.push_back(pos);			//then add the current offset to the book's vector of offsets
+							currentBookRefExists = true;
+						}
+					}
+					
+					if(!currentBookRefExists)			//if we haven't already stored a pairing for the we're in, we need to add it
+					{
+						WordLocations loc;
+						loc.bookID = bookIDRef.size() - 1;			//store current (most recently added) index of the bookID in the file
+						loc.locations.push_back(pos);				//plus all the offsets that the word appears in the file
+						index[word].push_back(loc);
+					}
 				}
 				else			//otherwise, no WordLocations stored, so one must be added 
 				{
 					WordLocations loc;
-					loc.locations.push_back(pos);
+					loc.bookID = bookIDRef.size() - 1;			//store current (most recently added) index of the bookID in the file
+					loc.locations.push_back(pos);				//plus all the offsets that the word appears in the file
 					index[word].push_back(loc);
 				}
 				
@@ -176,7 +165,7 @@ vector<string> Index::GetInstancesOf(string word)
 	vector<string> lines;
 	for(int i = 0; i < locations.size(); i++)
 	{
-		vector<string> temp = GetInstancesOfWordInFile(dirRoot, locations[i].locations);		//get every instance of word in each file
+		vector<string> temp = GetInstancesOfWordInFile(bookIDRef[locations[i].bookID], locations[i].locations);		//get every instance of word in each file
 		for(int i = 0; i < temp.size(); i++)		
 		{
 			lines.push_back(temp.at(i));			//and store it in lines
