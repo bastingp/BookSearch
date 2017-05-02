@@ -220,50 +220,28 @@ bool Index::hasEnding(string const &fullString, string const &ending)
 	}
 }
 
-void Index::buildStopWords()
-{
-	ifstream swFile;
-	swFile.open("stop_words.txt");
-	if (!swFile.is_open()) 
-	{
-	    cout <<"Stop Words File not Found" << endl;
-	    return;
-	    }
-	string line, word;
-	int position=0;
-	while(!swFile.fail())
-	{
-	    getline(swFile, line);//gets next line
-	    if (line != ""){
-		istringstream ssline(line);
-		while (ssline >> word)
-		{
-	    		stopWords.push_back(word);
-	    		//cout << word << endl;
-		}
-	    }
-	    position = swFile.tellg(); //gets position of next line
-	    }
+void Index::buildStopWords(){
+    string line, word; 
+ifstream infile("stopwords.txt"); // open the file
+    int position = 0; 
+    while (!infile.fail()) {
+        getline(infile, line); // get the next line of code
+        istringstream lineStream(line); // Create a string stream of the line
+        while (lineStream >> word) { // get the next word
+            StopWords[word];
+            // push the word and the line position on the vector for this word
+        }
+        position = infile.tellg(); // get the poistion of the next line
+    }
+    }
+
+bool Index::isStopWord (string word){	
+
+it = StopWords.find(word);
+    if (it == StopWords.end()) {
+         return(false);
+    } else {
+        return (true);
+    }
 }
 
-bool Index::isStopWord (string word)
-{
-	int count = 0;
-	for (int i=0; i < stopWords.size(); i++)
-	{	
-		//cout << stopWords[i]<< endl;
-		if(word == stopWords[i]){
-			//cout << "stop word found:" << word << endl;
-			count++;
-		}
-	}
-	if (count > 0){
-		//cout << word << " Is a stop word" << endl;
-		return true;
-	}
-	else
-	{
-	//	cout << word << "Is not a stop word" << endl;
-		return false;
-	}
-}
