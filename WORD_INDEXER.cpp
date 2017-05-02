@@ -206,9 +206,25 @@ bool Index::CarefulOpenIn(ifstream& infile, string name)
 
 void Index::MakeLower(string& word)
 {
-	for(int i = 0; i < word.length(); i++)
+	if(!word.empty())
 	{
-		word[i] = tolower(word[i]);
+		while(!isalpha(word.front()))			//if the word begins with punctuation (i.e., if it's in quotes),
+		{
+			word.erase(word.begin());					//don't store the punctuation
+		}
+	}
+			
+	if(!word.empty())
+	{
+		while(!isalpha(word.back()))		//do the same if it ends with punctuation
+		{
+			word.pop_back();
+		}
+	}
+
+	for(int i = 0; i < word.size(); i++)
+	{
+		word[i] = tolower(word[i]);		//make word lowercase
 	}
 }
 
