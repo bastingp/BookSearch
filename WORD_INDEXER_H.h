@@ -55,11 +55,17 @@ private:
 	void MakeLower(string& word);
 	
 	bool hasEnding (string const &fullString, string const &ending);
+	
+	void buildStopWordMap(); //builds a function from stopwords.txt 
+	
+	bool checkStopWord (string word); // checks to see if the word is a stopWord
 
 	string dirRoot;
 	string path;
 	map<string, BookMap> index;
 	vector<string> bookIDRef;
+	map<string, short int> StopWords; 
+	map<string, short int>::iterator it;
 };
 
 #endif
