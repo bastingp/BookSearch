@@ -41,6 +41,7 @@ void Index::Build()
 	}
 	
 	path = dirRoot;			//begin the path at the directory root
+	buildStopWords();
 	ProcessDirectory("");		//process every file beginning at directory root
 }
 
@@ -113,9 +114,11 @@ void Index::ProcessFile(string file)
 			istringstream iss(line);
 			while(iss >> word)				//read each word
 			{
-				MakeLower(word);			//store word as lower				
-				index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
-				
+				MakeLower(word);
+				if (!isStopWord(word)) //checks if it is a stop word
+				{			//store word as lower				
+					index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
+				}
 			}
 			
 			pos = infile.tellg();
@@ -213,6 +216,54 @@ bool Index::hasEnding(string const &fullString, string const &ending)
 	} 
 	else 
 	{
+		return false;
+	}
+}
+
+void Index::buildStopWords()
+{
+	ifstream swFile;
+	swFile.open("stop_words.txt");
+	if (!swFile.is_open()) 
+	{
+	    cout <<"Stop Words File not Found" << endl;
+	    return;
+	    }
+	string line, word;
+	int position=0;
+	while(!swFile.fail())
+	{
+	    getline(swFile, line);//gets next line
+	    if (line != ""){
+		istringstream ssline(line);
+		while (ssline >> word)
+		{
+	    		stopWords.push_back(word);
+	    		//cout << word << endl;
+		}
+	    }
+	    position = swFile.tellg(); //gets position of next line
+	    }
+}
+
+bool Index::isStopWord (string word)
+{
+	int count = 0;
+	for (int i=0; i < stopWords.size(); i++)
+	{	
+		//cout << stopWords[i]<< endl;
+		if(word == stopWords[i]){
+			//cout << "stop word found:" << word << endl;
+			count++;
+		}
+	}
+	if (count > 0){
+		//cout << word << " Is a stop word" << endl;
+		return true;
+	}
+	else
+	{
+	//	cout << word << "Is not a stop word" << endl;
 		return false;
 	}
 }
