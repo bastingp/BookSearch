@@ -46,7 +46,7 @@ private:
 	
 	void ProcessFile(string file);					//reads through the file, and adds it to our index
 
-	void CarefulOpenIn(ifstream& infile, string name);		//opens file, exits program if attempt fails
+	bool CarefulOpenIn(ifstream& infile, string name);		//opens file, exits program if attempt fails
 	
 	BookMap GetLocations(string word);				//returns WordLocations of word in index--returns an empty WordLocations if word not in index
 	

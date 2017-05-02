@@ -106,25 +106,27 @@ void Index::ProcessFile(string file)
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
 		bookIDRef.push_back(path + file);			//add the current file path to our bookIDRef vector
-		CarefulOpenIn(infile, (path + file));
-		int pos= 0;
-		while(!infile.fail())			//read through the whole file
+		if(CarefulOpenIn(infile, (path + file)))
 		{
-			getline(infile, line);			//get each line
-			istringstream iss(line);
-			while(iss >> word)				//read each word
+			int pos= 0;
+			while(!infile.fail())			//read through the whole file
 			{
-				MakeLower(word);
-				if (!IsStopWord(word)) //checks if it is a stop word
-				{			//store word as lower				
-					index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
+				getline(infile, line);			//get each line
+				istringstream iss(line);
+				while(iss >> word)				//read each word
+				{
+					MakeLower(word);
+					if (!IsStopWord(word)) //checks if it is a stop word
+					{			//store word as lower				
+						index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
+					}
 				}
+				
+				pos = infile.tellg();
 			}
 			
-			pos = infile.tellg();
+			infile.close();
 		}
-		
-		infile.close();
 	}
 }
 
@@ -152,28 +154,30 @@ vector<string> Index::GetInstancesOfWordInFile(string filePath, vector<int> posi
 {
 	vector<string> lines;
 	ifstream infile;
-	CarefulOpenIn(infile, filePath);
-	
-	string line, word;
-	int last_pos = -1;
-	for(int i = 0; i < positions.size(); i++)			//output lines starting at each position
+	if(CarefulOpenIn(infile, filePath))
 	{
-		infile.seekg(positions[i], infile.beg);
-		getline(infile, line);
-		if(positions[i] != last_pos)							//don't output same line multiple times
+		string line, word;
+		int last_pos = -1;
+		for(int i = 0; i < positions.size(); i++)			//output lines starting at each position
 		{
-			istringstream iss(line);
-			line = "";
-			while(iss >> word)					//add each word into line
+			infile.seekg(positions[i], infile.beg);
+			getline(infile, line);
+			if(positions[i] != last_pos)							//don't output same line multiple times
 			{
-				line += word + " ";
+				istringstream iss(line);
+				line = "";
+				while(iss >> word)					//add each word into line
+				{
+					line += word + " ";
+				}
 			}
+			last_pos = positions[i];
+			lines.push_back(line);
 		}
-		last_pos = positions[i];
-		lines.push_back(line);
+		
+		infile.close();
 	}
 	
-	infile.close();
 	return lines;
 }
 
@@ -189,14 +193,15 @@ BookMap Index::GetLocations(string word)
 		return index[word];
 }
 
-void Index::CarefulOpenIn(ifstream& infile, string name)
+bool Index::CarefulOpenIn(ifstream& infile, string name)
 {
       infile.open(name.c_str(), ios::binary);			//was getting wrong positions without opening binary
       if(infile.fail())
       {
          cout << "\n\n\nThere was an error opening the input file " << name << ".\n\n";
+		 return false;
       }
-      return;
+      return true;
 }
 
 void Index::MakeLower(string& word)
