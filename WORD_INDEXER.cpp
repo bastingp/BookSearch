@@ -41,7 +41,7 @@ void Index::Build()
 	}
 	
 	path = dirRoot;			//begin the path at the directory root
-	buildStopWords();
+	BuildStopWords();
 	ProcessDirectory("");		//process every file beginning at directory root
 }
 
@@ -115,7 +115,7 @@ void Index::ProcessFile(string file)
 			while(iss >> word)				//read each word
 			{
 				MakeLower(word);
-				if (!isStopWord(word)) //checks if it is a stop word
+				if (!IsStopWord(word)) //checks if it is a stop word
 				{			//store word as lower				
 					index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
 				}
@@ -220,28 +220,35 @@ bool Index::hasEnding(string const &fullString, string const &ending)
 	}
 }
 
-void Index::buildStopWords(){
+void Index::BuildStopWords()
+{
     string line, word; 
-ifstream infile("stopwords.txt"); // open the file
+	ifstream infile("stopwords.txt"); // open the file
     int position = 0; 
-    while (!infile.fail()) {
+    while (!infile.fail()) 
+	{
         getline(infile, line); // get the next line of code
         istringstream lineStream(line); // Create a string stream of the line
-        while (lineStream >> word) { // get the next word
-            StopWords[word];
+        while (lineStream >> word) 
+		{ // get the next word
+            stopWords[word];
             // push the word and the line position on the vector for this word
         }
         position = infile.tellg(); // get the poistion of the next line
     }
-    }
+}
 
-bool Index::isStopWord (string word){	
-
-it = StopWords.find(word);
-    if (it == StopWords.end()) {
-         return(false);
-    } else {
-        return (true);
+bool Index::IsStopWord(string word)
+{
+	map<string, short int>::iterator it;	
+	it = stopWords.find(word);
+    if (it == stopWords.end()) 
+	{
+         return false;
+    } 
+	else 
+	{
+        return true;
     }
 }
 
