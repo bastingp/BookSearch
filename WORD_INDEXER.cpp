@@ -208,7 +208,7 @@ void Index::MakeLower(string& word)
 {
 	if(!word.empty())
 	{
-		while(!isalpha(word.front()))			//if the word begins with punctuation (i.e., if it's in quotes),
+		while(!isalpha(word.front()) && !word.empty())			//if the word begins with punctuation (i.e., if it's in quotes),
 		{
 			word.erase(word.begin());					//don't store the punctuation
 		}
