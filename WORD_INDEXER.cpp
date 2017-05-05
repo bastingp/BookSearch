@@ -105,7 +105,16 @@ void Index::ProcessFile(string file)
 	string line, word;
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
-		bookIDRef.push_back(path + file);			//add the current file path to our bookIDRef vector
+		fileCount++;
+		cout << "processing file# "<<fileCount<<":"<<path << file <<endl;
+		string bookFileName = "books/book_file.txt";
+		ofstream bookFile(bookFileName.c_str(), ios::out | ios::app); //opens file to output file paths to
+		int booknum = bookFile.tellp();			//gets start location of path in file
+		bookFile << (path + file);
+		bookFile << endl;
+		
+		bookFile.close();
+
 		if(CarefulOpenIn(infile, (path + file)))
 		{
 			int pos= 0;
@@ -118,7 +127,11 @@ void Index::ProcessFile(string file)
 					MakeLower(word);
 					if (!IsStopWord(word)) //checks if it is a stop word
 					{			//store word as lower				
-						index[word].bookOffsets[(unsigned short int)(bookIDRef.size() - 1)].push_back(pos);
+						string newFileName = "words/"+word+".bin";
+						ofstream wordFileOut(newFileName.c_str(), ios::out | ios::binary | ios::app); //file to store book locations and word locations
+						wordFileOut.write((char*)&booknum, sizeof(int));
+						wordFileOut.write((char*)&pos, sizeof(int));
+						wordFileOut.close();
 					}
 				}
 				
@@ -132,24 +145,58 @@ void Index::ProcessFile(string file)
 
 vector<string> Index::GetInstancesOf(string word)
 {	
-	BookMap bookMap;
-
-	MakeLower(word);		//make sure word is normalized
-	bookMap = GetLocations(word);
-
-	vector<string> lines;
-	for(map<unsigned short int, vector<int> >::iterator it = bookMap.bookOffsets.begin(); it != bookMap.bookOffsets.end(); it++)		//iterate through every book
+	MakeLower(word);
+	string newFileName = "words/"+word+".bin";
+	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
+	int i = 2;
+	int value;
+	int book;
+	int position;
+	string bookPath="";
+	string line;
+	vector<string> instancesOfWord;
+	if (wordFile.is_open())
 	{
-		vector<string> temp = GetInstancesOfWordInFile(bookIDRef[it->first], it->second);		//get every instance of word in each file
-		for(int i = 0; i < temp.size(); i++)		
+		while (!wordFile.eof())
 		{
-			lines.push_back(temp.at(i));			//and store it in lines
+			wordFile.read((char*)&value, sizeof(int));
+			if (!wordFile.eof())
+			{
+				if (i % 2 == 0) //alternates how the values are handled
+				{
+					book = value;
+				} 
+				else
+				{
+					position = value;
+					ifstream bookFile, bookPathIndex;
+					bookPathIndex.open("books/book_file.txt", ios::in); //file where paths are stored
+					bookPathIndex.seekg(book, bookPathIndex.beg);
+					getline(bookPathIndex, bookPath);
+					if(CarefulOpenIn(bookFile, bookPath))
+					{
+						bookFile.seekg(position, bookFile.beg);
+						getline(bookFile, line);
+						//get title
+						instancesOfWord.push_back(line);
+					}
+				}
+				i++;
+			}
 		}
+		return instancesOfWord;
 	}
-	
-	return lines;
+	else //couldnt find word file aka there were no instances stored of that word
+	{
+		instancesOfWord.push_back("No matches found");
+		return instancesOfWord;
+	}
+
 }
 
+/////////////////////////////////////
+//NOT CURRENTLY USING THIS FUNCTION//
+/////////////////////////////////////
 vector<string> Index::GetInstancesOfWordInFile(string filePath, vector<int> positions)
 {
 	vector<string> lines;
@@ -222,9 +269,16 @@ void Index::MakeLower(string& word)
 		}
 	}
 
-	for(int i = 0; i < word.size(); i++)
+	if (word.size() > 0)
 	{
-		word[i] = tolower(word[i]);		//make word lowercase
+		for(int i = 0; i < word.size(); i++)
+		{
+			word[i] = tolower(word[i]);		//make word lowercase
+			if (!isalpha(word[i]))			//if any internal char is punctiation, erase word
+			{
+				word = "";
+			}
+		}
 	}
 }
 
@@ -263,7 +317,7 @@ bool Index::IsStopWord(string word)
 {
 	map<string, short int>::iterator it;	
 	it = stopWords.find(word);
-    if (it == stopWords.end()) 
+    if (it == stopWords.end() || word == "") 
 	{
          return false;
     } 
@@ -271,5 +325,15 @@ bool Index::IsStopWord(string word)
 	{
         return true;
     }
+}
+
+
+string Index::GetTitle(ifstream& infile)
+{
+	///////NOT DONE YET////////////////
+	int pos = 0;
+	string line;
+	infile.seekg(pos, infile.beg);
+	getline(infile, line);
 }
 

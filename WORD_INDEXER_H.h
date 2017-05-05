@@ -60,11 +60,14 @@ private:
 	
 	bool IsStopWord (string word); // checks to see if the word is a stopWord
 
+	string GetTitle(ifstream& infile); //finds the title of the book from a given text file
+
 	string dirRoot;
 	string path;
 	map<string, BookMap> index;
-	vector<string> bookIDRef;
-	map<string, short int> stopWords; 
+	vector<int> bookIDRef;
+	map<string, short int> stopWords;
+	int fileCount =0; 
 };
 
 #endif

@@ -17,39 +17,34 @@ using namespace std;
 
 int main() 
 { 
-	string rootDirectory = "/home/students/schutzj/FinalProject/Test/Books"; 
+	string rootDirectory = "/home/skon/books/"; 
 	Index index(rootDirectory);
 	index.Build();
 	char again;
-	do 
-	{
-		string word;
+	vector<string> matchLines;
+//	do 
+//	{
+//		string word;
 
 		//word = getInput(); 
-		cout << "Enter word: " ; 
-		cin >> word; 
-		cout << endl; 
-		
-		stringstream iss;
+//		cout << "Enter word: " ; 
+//		cin >> word; 
+//		cout << endl; 
 
-		vector<string>instancesSet = index.GetInstancesOf(word);
-	
-		iss << instancesSet.size();
-		
-		cout << "Number of entries: " << iss.str() << endl;
+	//	matchLines = index.GetInstancesOf(word);
 
-		for (int i=0; i < instancesSet.size(); i++)
-		{
-			cout << instancesSet[i] << endl; 
-		}
+	//	 for (int i=0; i < matchLines.size(); i++)
+	//	 {
+	//	 	cout << matchLines[i] << endl; 
+	//	 }
 
-		cout << "$END"; 
+		// cout << "$END"; 
 
-		cout << "Hit A to go again" << endl;
+	//	cout << "Hit A to go again" << endl;
 		//checks loop to go again
-		cin >> again;
+	//	cin >> again;
 
-	} while (again == 'A' || again == 'a');
+//	} while (again == 'A' || again == 'a');
 
 }
     
