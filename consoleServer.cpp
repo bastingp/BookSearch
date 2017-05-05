@@ -26,7 +26,7 @@ int main()
 	{
 		string word;
 
-		word = getInput(); 
+		//word = getInput(); 
 		cout << "Enter word: " ; 
 		cin >> word; 
 		cout << endl; 
@@ -41,7 +41,7 @@ int main()
 		cout << "$END"; 
 
 		cout << "Hit A to go again" << endl;
-		checks loop to go again
+		//checks loop to go again
 		cin >> again;
 
 	} while (again == 'A' || again == 'a');
