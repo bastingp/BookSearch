@@ -22,29 +22,29 @@ int main()
 	index.Build();
 	char again;
 	vector<string> matchLines;
-//	do 
-//	{
-//		string word;
+	do 
+	{
+		string word;
 
-		//word = getInput(); 
-//		cout << "Enter word: " ; 
-//		cin >> word; 
-//		cout << endl; 
+		word = getInput(); 
+		cout << "Enter word: " ; 
+		cin >> word; 
+		cout << endl; 
 
-	//	matchLines = index.GetInstancesOf(word);
+		matchLines = index.GetInstancesOf(word);
 
-	//	 for (int i=0; i < matchLines.size(); i++)
-	//	 {
-	//	 	cout << matchLines[i] << endl; 
-	//	 }
+		 for (int i=0; i < matchLines.size(); i++)
+		 {
+		 	cout << matchLines[i] << endl; 
+		 }
 
-		// cout << "$END"; 
+		cout << "$END"; 
 
-	//	cout << "Hit A to go again" << endl;
-		//checks loop to go again
-	//	cin >> again;
+		cout << "Hit A to go again" << endl;
+		checks loop to go again
+		cin >> again;
 
-//	} while (again == 'A' || again == 'a');
+	} while (again == 'A' || again == 'a');
 
 }
     
