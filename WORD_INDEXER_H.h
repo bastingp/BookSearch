@@ -13,6 +13,7 @@
 #include<sstream>
 #include<algorithm>
 #include<dirent.h>
+#include<utility>
 
 using namespace std;
 
@@ -62,9 +63,18 @@ private:
 
 	string GetTitle(ifstream& infile); //finds the title of the book from a given text file
 
+	void AddWordsToMap(unsigned short int bookIndex, string bookPath);
+
+	void WriteMapToFile();
+
 	string dirRoot;
 	string path;
+	string bookDir = "books/book_paths.txt";
+	string wordsDir = "words/";
+	string wordsFileType = ".bin";
+	pair <unsigned short int, int> wordPair;
 	map<string, BookMap> index;
+	map<string, vector<pair<unsigned short int, int> > > pairIndex;
 	vector<int> bookIDRef;
 	map<string, short int> stopWords;
 	int fileCount =0; 

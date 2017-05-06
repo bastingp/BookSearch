@@ -40,6 +40,7 @@ void Index::Build()
 		return;
 	}
 	
+	bookIDRef.clear();
 	path = dirRoot;			//begin the path at the directory root
 	BuildStopWords();
 	ProcessDirectory("");		//process every file beginning at directory root
@@ -107,38 +108,20 @@ void Index::ProcessFile(string file)
 	{  
 		fileCount++;
 		cout << "processing file# "<<fileCount<<":"<<path << file <<endl;
-		string bookFileName = "books/book_file.txt";
+		string bookFileName = bookDir;
 		ofstream bookFile(bookFileName.c_str(), ios::out | ios::app); //opens file to output file paths to
 		int booknum = bookFile.tellp();			//gets start location of path in file
+		bookIDRef.push_back(booknum);
 		bookFile << (path + file);
 		bookFile << endl;
 		
 		bookFile.close();
-
-		if(CarefulOpenIn(infile, (path + file)))
+		unsigned short int bookPathIndex = bookIDRef.size() - 1;
+		AddWordsToMap(bookPathIndex, (path+file));
+		if (fileCount % 10 == 0)
 		{
-			int pos= 0;
-			while(!infile.fail())			//read through the whole file
-			{
-				getline(infile, line);			//get each line
-				istringstream iss(line);
-				while(iss >> word)				//read each word
-				{
-					MakeLower(word);
-					if (!IsStopWord(word)) //checks if it is a stop word
-					{			//store word as lower				
-						string newFileName = "words/"+word+".bin";
-						ofstream wordFileOut(newFileName.c_str(), ios::out | ios::binary | ios::app); //file to store book locations and word locations
-						wordFileOut.write((char*)&booknum, sizeof(int));
-						wordFileOut.write((char*)&pos, sizeof(int));
-						wordFileOut.close();
-					}
-				}
-				
-				pos = infile.tellg();
-			}
-			
-			infile.close();
+			WriteMapToFile();
+			pairIndex.clear();
 		}
 	}
 }
@@ -146,11 +129,11 @@ void Index::ProcessFile(string file)
 vector<string> Index::GetInstancesOf(string word)
 {	
 	MakeLower(word);
-	string newFileName = "words/"+word+".bin";
+	string newFileName = wordsDir+word+wordsFileType;
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
 	int i = 2;
 	int value;
-	int book;
+	unsigned short int book;
 	int position;
 	string bookPath="";
 	string line;
@@ -159,30 +142,36 @@ vector<string> Index::GetInstancesOf(string word)
 	{
 		while (!wordFile.eof())
 		{
-			wordFile.read((char*)&value, sizeof(int));
-			if (!wordFile.eof())
+			if (i % 2 == 0) //alternates how the values are handled
 			{
-				if (i % 2 == 0) //alternates how the values are handled
+				wordFile.read((char*)&value, sizeof(unsigned short int));
+				if (!wordFile.eof())
 				{
 					book = value;
-				} 
-				else
+				}
+			} 
+			else
+			{
+				wordFile.read((char*)&value, sizeof(int));
+				if (!wordFile.eof())
 				{
 					position = value;
 					ifstream bookFile, bookPathIndex;
-					bookPathIndex.open("books/book_file.txt", ios::in); //file where paths are stored
-					bookPathIndex.seekg(book, bookPathIndex.beg);
+					bookPathIndex.open(bookDir, ios::in); //file where paths are stored
+					bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
 					getline(bookPathIndex, bookPath);
 					if(CarefulOpenIn(bookFile, bookPath))
 					{
 						bookFile.seekg(position, bookFile.beg);
 						getline(bookFile, line);
 						//get title
+						string bookFileName = bookPath.erase(0,bookPath.length()-12);
+						instancesOfWord.push_back(bookFileName+":");
 						instancesOfWord.push_back(line);
 					}
 				}
-				i++;
 			}
+			i++;
 		}
 		return instancesOfWord;
 	}
@@ -192,6 +181,51 @@ vector<string> Index::GetInstancesOf(string word)
 		return instancesOfWord;
 	}
 
+}
+
+void Index::AddWordsToMap(unsigned short int bookIndex, string bookPath){
+	ifstream bookFile;
+	string line, word;
+	if(CarefulOpenIn(bookFile, bookPath)){
+		int pos = 0;
+		while(!bookFile.fail())			//read through the whole file
+		{
+			getline(bookFile, line);			//get each line
+			istringstream iss(line);
+			while(iss >> word)				//read each word
+			{
+				MakeLower(word);
+				if (!IsStopWord(word)) //checks if it is a stop word
+				{			//store word as lower				
+					wordPair = make_pair(bookIndex,pos);
+					pairIndex[word].push_back(wordPair);
+				}
+			}
+			
+			pos = bookFile.tellg();
+		}
+		bookFile.close();
+	}
+}
+
+void Index::WriteMapToFile(){
+	map<string, vector<pair<unsigned short int, int> > >::iterator it;
+	string fileName;
+	unsigned short int bookPathIndex;
+	int pos;
+	for (it = pairIndex.begin(); it != pairIndex.end(); it++) //for every key in the map
+	{
+		for (int i = 0; i < it->second.size(); i++) 			//for every value in the vector of pairs
+		{
+			fileName = wordsDir + (it->first) + wordsFileType;
+			bookPathIndex = (it->second)[i].first; 				//first value from pair: book index in vector of book positions
+			pos = (it->second)[i].second;						//secont value from pair: position of word in file
+			ofstream wordFileOut(fileName.c_str(), ios::out | ios::binary | ios::app); //file to store book locations and word locations
+			wordFileOut.write((char*)&bookPathIndex, sizeof(unsigned short int));
+			wordFileOut.write((char*)&pos, sizeof(int));
+			wordFileOut.close();
+		}
+	}
 }
 
 /////////////////////////////////////
