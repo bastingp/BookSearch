@@ -44,6 +44,8 @@ void Index::Build()
 	path = dirRoot;			//begin the path at the directory root
 	BuildStopWords();
 	ProcessDirectory("");		//process every file beginning at directory root
+	WriteMapToFile();		//ensures remaining map values ge written to file
+	pairIndex.clear();
 }
 
 void Index::ProcessDirectory(string directory)
