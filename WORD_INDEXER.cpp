@@ -115,7 +115,7 @@ void Index::ProcessFile(string file)
 		int booknum = bookFile.tellp();			//gets start location of path in file
 		bookIDRef.push_back(booknum);
 		ofstream bookVectorStorage(bookPathPos.c_str(), ios::out | ios::app); //stores book vector as file
-		bookVectorStorage << booknum;
+		bookVectorStorage << booknum << endl;
 		bookFile << (path + file);
 		bookFile << endl;
 		
@@ -132,7 +132,10 @@ void Index::ProcessFile(string file)
 
 string Index::GetInstancesOf(string word, int nextWordNum)
 {	
-	BuildBookIDVector();
+	if(bookIDRef.empty())
+	{
+		BuildBookIDVector();
+	}
 	MakeLower(word);
 	string newFileName = wordsDir+word+wordsFileType;
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
@@ -192,14 +195,18 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 
 void Index::BuildBookIDVector()
 {
-	int value;
+	string value;
 	bookIDRef.clear();
 	ifstream bookPathPositions;
 	bookPathPositions.open(bookPathPos, ios::in);
+	bookPathPositions.seekg(0,bookPathPositions.beg);
 	while(!bookPathPositions.eof())
 	{
-		bookPathPositions.read((char*)&value, sizeof(int));
-		bookIDRef.push_back(value);
+		getline(bookPathPositions,value);
+		if(value.length() >0)
+		{
+			bookIDRef.push_back(stoi(value));
+		}
 	}
 }
 
