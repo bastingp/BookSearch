@@ -118,8 +118,8 @@ void Index::ProcessFile(string file)
 		bookFile.close();
 		unsigned short int bookPathIndex = bookIDRef.size() - 1;
 		AddWordsToMap(bookPathIndex, (path+file));
-		if (fileCount % 10 == 0)
-		{
+		if (fileCount % 1000 == 0) //how many files stored in map
+		{			   //until written to file
 			WriteMapToFile();
 			pairIndex.clear();
 		}
