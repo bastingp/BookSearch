@@ -143,7 +143,7 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 	string instanceOfWord="";
 	if (wordFile.is_open())
 	{
-		while (!wordFile.eof() && j < nextWordNum)
+		while (!wordFile.eof() && j <= nextWordNum)
 		{
 			if (i % 2 == 0) //alternates how the values are handled
 			{
