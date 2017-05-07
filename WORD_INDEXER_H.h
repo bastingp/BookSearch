@@ -67,9 +67,12 @@ private:
 
 	void WriteMapToFile();
 
+	void BuildBookIDVector(); //populates vector when the index building is not run
+
 	string dirRoot;
 	string path;
 	string bookDir = "books/book_paths.txt";
+	string bookPathPos = "books/bookPathPos.txt";
 	string wordsDir = "words/";
 	string wordsFileType = ".bin";
 	pair <unsigned short int, int> wordPair;
