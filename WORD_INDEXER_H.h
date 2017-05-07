@@ -78,7 +78,7 @@ private:
 	pair <unsigned short int, int> wordPair;
 	map<string, BookMap> index;
 	map<string, vector<pair<unsigned short int, int> > > pairIndex;
-	vector<int> bookIDRef;
+	vector<long int> bookIDRef;
 	map<string, short int> stopWords;
 	int fileCount =0; 
 };

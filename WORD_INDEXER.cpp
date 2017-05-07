@@ -112,7 +112,7 @@ void Index::ProcessFile(string file)
 		cout << "processing file# "<<fileCount<<":"<<path << file <<endl;
 		string bookFileName = bookDir;
 		ofstream bookFile(bookFileName.c_str(), ios::out | ios::app); //opens file to output file paths to
-		int booknum = bookFile.tellp();			//gets start location of path in file
+		long int booknum = bookFile.tellp();			//gets start location of path in file
 		bookIDRef.push_back(booknum);
 		ofstream bookVectorStorage(bookPathPos.c_str(), ios::out | ios::app); //stores book vector as file
 		bookVectorStorage << booknum << endl;
@@ -205,7 +205,7 @@ void Index::BuildBookIDVector()
 		getline(bookPathPositions,value);
 		if(value.length() >0)
 		{
-			bookIDRef.push_back(stoi(value));
+			bookIDRef.push_back(stol(value));
 		}
 	}
 }
