@@ -236,6 +236,7 @@ void Index::AddWordsToMap(unsigned short int bookIndex, string bookPath){
 }
 
 void Index::WriteMapToFile(){
+	cout << "writing words to word file...." << endl;
 	map<string, vector<pair<unsigned short int, int> > >::iterator it;
 	string fileName;
 	unsigned short int bookPathIndex;
