@@ -120,7 +120,7 @@ void Index::ProcessFile(string file)
 		bookFile.close();
 		unsigned short int bookPathIndex = bookIDRef.size() - 1;
 		AddWordsToMap(bookPathIndex, (path+file));
-		if (fileCount % 1000 == 0) //how many files stored in map
+		if (fileCount % 2000 == 0) //how many files stored in map
 		{			   //until written to file
 			WriteMapToFile();
 			pairIndex.clear();
@@ -128,18 +128,19 @@ void Index::ProcessFile(string file)
 	}
 }
 
-vector<string> Index::GetInstancesOf(string word)
+string Index::GetInstancesOf(string word, int nextWordNum)
 {	
 	MakeLower(word);
 	string newFileName = wordsDir+word+wordsFileType;
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
-	int i = 2;
+	int i = 0;
+	int j = 0;
 	int value;
 	unsigned short int book;
 	int position;
 	string bookPath="";
 	string line;
-	vector<string> instancesOfWord;
+	string instanceOfWord="";
 	if (wordFile.is_open())
 	{
 		while (!wordFile.eof())
@@ -162,25 +163,26 @@ vector<string> Index::GetInstancesOf(string word)
 					bookPathIndex.open(bookDir, ios::in); //file where paths are stored
 					bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
 					getline(bookPathIndex, bookPath);
-					if(CarefulOpenIn(bookFile, bookPath))
+					if(CarefulOpenIn(bookFile, bookPath) && j == nextWordNum)
 					{
 						bookFile.seekg(position, bookFile.beg);
 						getline(bookFile, line);
 						//get title
-						string bookFileName = bookPath.erase(0,bookPath.length()-12);
-						instancesOfWord.push_back(bookFileName+":");
-						instancesOfWord.push_back(line);
+						//string bookFileName = bookPath.erase(0,bookPath.length()-12);
+						//instancesOfWord.push_back(bookFileName+":");
+						instanceOfWord = line;
 					}
+					j++;
 				}
 			}
 			i++;
 		}
-		return instancesOfWord;
+		return instanceOfWord;
 	}
 	else //couldnt find word file aka there were no instances stored of that word
 	{
-		instancesOfWord.push_back("No matches found");
-		return instancesOfWord;
+		instanceOfWord = "";
+		return instanceOfWord;
 	}
 
 }
@@ -334,7 +336,7 @@ bool Index::hasEnding(string const &fullString, string const &ending)
 void Index::BuildStopWords()
 {
     string line, word; 
-	ifstream infile("stopwords.txt"); // open the file
+	ifstream infile("NewStop.txt"); // open the file
     int position = 0; 
     while (!infile.fail()) 
 	{
