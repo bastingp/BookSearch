@@ -2,7 +2,38 @@
 
 <html>
 
-<script type = "text/javascript" src="bookSearch.js">
+<script type = "text/javascript">
+var XMLHttp;
+var CGIBusy = false;
+if(navigator.appName == "Microsoft Internet Explorer") {
+    XMLHttp = new ActiveXObject("Microsoft.XMLHTTP");
+} else {
+    XMLHttp = new XMLHttpRequest();
+}
+			
+function getresponse () 
+{
+	if(CGIBusy)	return;		//don't open another CGI if it's already busy
+
+    var word = document.getElementById('word').value;		     
+    if (word.length <= 3) return;							//don't look for words 3 or fewer characters
+	CGIBusy = true;
+	document.getElementById('display').innerHTML = "";		//wipe previous results
+
+    XMLHttp.open("GET", "/cgi-bin/schutzj_shakesfetchajax.cgi?"
+						 + "&word=" + word
+						 ,true);
+    XMLHttp.onreadystatechange=function() 
+	{
+		if(XMLHttp.readyState == 4)
+		{
+			document.getElementById('display').innerHTML += XMLHttp.responseText;			//update display with CGI response
+			CGIBusy = false;
+		}
+	}
+	XMLHttp.send(null);
+}
+
 </script>
 
 	<head>
@@ -19,8 +50,8 @@
 		</div>
 
 		<div class = "search">
-			<input type="text" class = "text_input" maxlength="20">
-			<input class = "Button" type="submit" onclick="" value="Search">
+			<input type="text" id="word" class = "text_input" maxlength="20"></input>
+			<input class="Button" type="submit" onclick="" value="Search">
 		</div>
 		<div class = "main">
 		<div class = "display">
