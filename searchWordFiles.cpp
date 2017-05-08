@@ -22,61 +22,42 @@ int main()
 	string receive_fifo = "GutenbergRequest";
 	string send_fifo = "GutenbergReply";
 
+	const string wordNotFoundMessage = "No matches found.";
 	
 	Index index;	
 	
 	// create the FIFOs for communication
     Fifo recfifo(receive_fifo);
-    Fifo sendfifo(send_fifo);
+    Fifo sendfifo(send_fifo);	
 	
-	string outMessage;
-	
-	
-	while(1)
-	{//this will keep running 
-		string matchLine;
-		string word;
-		
-		//gets the input from CGI
+	while(1)		//main server loop
+	{				
 		recfifo.openread();
-        word = recfifo.recv();
+        string word = recfifo.recv();		//get word to search for from CGI
 		
-		cout << "Word: " << endl; 
-		
-		
-		//initiates write lock 
-		
-		sendfifo.openwrite();
-        sendfifo.send("</p>");
+		cout << "Word: " << word << endl;		
+		sendfifo.openwrite();		//initiates write lock 
         int i = 0; 
-		do
+		do					//get every line instances for the word
 		{
-			matchLine = index.GetInstancesOf(word, i);
-			if(i==0 && matchLine =="")
+			string matchLine = index.GetInstancesOf(word, i);			//get the match line
+			if(i==0 && matchLine =="")				//if i is 0, and no matching line is returned, then the word does not exist in the index
 			{
 				cout << "No Matches found for: "<<word<<endl;
+				sendfifo.send(wordNotFoundMessage);					
 			}
 			else
 			{
 				cout << matchLine << endl;
-				outMessage = matchLine; 
-				sendfifo.send(outMessage); 
-				sendfifo.send("</p>");
-				 //ships out lines to website. 
-				i++;
+				sendfifo.send(matchLine); 
+				i++;									//increment i to get the next line
 			}
 		}while(matchLine != "");
-	
 
-		
-
-		//closes up
-		cout << "$END"; 
-		sendfifo.send("$END");
+		cout << "$END\n"; 
+		sendfifo.send("$END");				//let CGI know that loop is over
         sendfifo.fifoclose();
-       	recfifo.fifoclose();
-
+       	recfifo.fifoclose();			//close FIFOs
 	}
-
 }
     
