@@ -43,9 +43,9 @@ int main()
     // Create AJAX objects to recieve information from web page.
     form_iterator word = cgi.getElement("word");
 
-    // // create the FIFOs for communication
-    // Fifo recfifo(receive_fifo);
-    // Fifo sendfifo(send_fifo);
+    // create the FIFOs for communication
+    Fifo recfifo(receive_fifo);
+    Fifo sendfifo(send_fifo);
 
     cout << "Content-Type: text/plain\n\n";
 
@@ -53,25 +53,26 @@ int main()
     // stword = StringToUpper(stword); //gets to upper case 
 
 
-    // sendfifo.openwrite();
-    // sendfifo.send(searchWord);			//send the word to the server
+    sendfifo.openwrite();
+    sendfifo.send(searchWord);			//send the word to the server
 
-    // recfifo.openread();
-    // cout << "</p>";
-	// string reply;
-    // do 					//get messages from server
-	// {
-        // reply = recfifo.recv();
-        // cout << "</p>" << reply;				//and send it back to the website
-    // } while (reply.find("$END") == string::npos);
-	
-    // recfifo.fifoclose();
-    // sendfifo.fifoclose();			//close FIFOs
-	
-	for(int i = 0; i < 1000; i++)
+    recfifo.openread();
+	string reply;
+    do 					//get messages from server
 	{
-		cout << "</p>" << searchWord;
-	}
+        reply = recfifo.recv();
+		if(reply.find("$END") == string::npos)
+		{
+			cout << "</p>" << reply;				//and send it back to the website
+		}
+		else
+		{
+			//then do not send the message
+		}
+    } while (reply.find("$END") == string::npos);
+	
+    recfifo.fifoclose();
+    sendfifo.fifoclose();			//close FIFOs
 	
     return 0;
 }
