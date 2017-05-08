@@ -10,34 +10,41 @@
 #include <string>
 #include <vector>
 #include "WORD_INDEXER_H.h"
-//#inlcude "fifo.h"
+#include "fifo.h"
 
 using namespace std;
 
 /* Fifo names */
-//string receive_fifo = "GutenbergRequest";
-//string send_fifo = "GutenbergReply";
+string receive_fifo = "GutenbergRequest";
+string send_fifo = "GutenbergReply";
 
+int i; 
 
 int main() 
 { 
+	// create the FIFOs for communication
+    Fifo recfifo(receive_fifo);
+    Fifo sendfifo(send_fifo);
+	
 	string inMessage, outMessage;
 	
-	string rootDirectory = "/home/preston/Software_Development/project6/books_archive"; 
-	Index index(rootDirectory);
-	//index.Build();
 	
 	while(1){//this will keep running 
 	string matchLine;
-		string word;
+	string word;
 		
 		//gets the input from CGI
-	//	recfifo.openread();
-    //    	inMessage = recfifo.recv();
-		cout << "Search: ";
-		cin >> word;	
-		//cout << "Word: " << endl; 
-		int i = 0;
+		recfifo.openread();
+        inMessage = recfifo.recv();
+		
+		cout << "Word: " << endl; 
+		
+		
+		//initiates write lock 
+		
+		sendfifo.openwrite();
+        sendfifo.send("</p>");
+        i = 0; 
 		do{
 			matchLine = index.GetInstancesOf(word, i);
 			if(i==0 && matchLine =="")
@@ -47,28 +54,22 @@ int main()
 			else
 			{
 				cout << matchLine << endl;
+				outMessage = matchLine; 
+				sendfifo.send(outMessage); 
+				sendfifo.send("</p>");
+				 //ships out lines to website. 
 				i++;
 			}
 		}while(matchLine != "");
-		//initiates write lock 
-		
-		// sendfifo.openwrite();
-        //	sendfifo.send("</p>");
+	
 
-		// for (int i=0; i < matchLines.size(); i++)
-		 //{
-		// 	cout << matchLines[i] << endl; 
-		//	outMessage = matchLines[i]; 
-		//	sendfifo.send(outMessage); 
-		//	sendfifo.send("</p>");
-			 //ships out lines to website. 
-		 //}
+		
 
 		//closes up
-		//cout << "$END"; 
-		//sendfifo.send("$END");
-        //	sendfifo.fifoclose();
-       	//	recfifo.fifoclose();
+		cout << "$END"; 
+		sendfifo.send("$END");
+        sendfifo.fifoclose();
+       	recfifo.fifoclose();
 
 	}
 

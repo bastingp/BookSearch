@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include "WORD_INDEXER_H.h"
-#inlcude "fifo.h"
+#include "fifo.h"
 
 using namespace std;
 
@@ -22,6 +22,11 @@ string send_fifo = "GutenbergReply";
 
 int main() 
 { 
+	
+	// create the FIFOs for communication
+    Fifo recfifo(receive_fifo);
+    Fifo sendfifo(send_fifo);
+    
 	string inMessage, outMessage;
 	
 	string rootDirectory = "/home/skon/books/"; 
@@ -67,4 +72,6 @@ int main()
 	}
 
 }
+}
+
     
