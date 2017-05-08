@@ -27,16 +27,20 @@ function getresponse ()
     <!-- XMLHttp.open("GET", "/cgi-bin/schutzj_shakesfetchajax.cgi?" -->
 						 <!-- + "&word=" + word -->
 						 <!-- ,true); -->
-    XMLHttp.onreadystatechange=function() 
-	{
-		if(XMLHttp.readyState == 4)
-		{
-			<!-- document.getElementById('display').innerHTML += XMLHttp.responseText;			//update display with CGI response -->
-			document.getElementById('display').innerHTML += word;
-			CGIBusy = false;
-		}
-	}
-	XMLHttp.send(null);
+    <!-- XMLHttp.onreadystatechange=function()  -->
+	<!-- { -->
+		<!-- if(XMLHttp.readyState == 4) -->
+		<!-- { -->
+			<!-- <!-- document.getElementById('display').innerHTML += XMLHttp.responseText;			//update display with CGI response --> -->
+			<!-- document.getElementById('display').innerHTML += word; -->
+			<!-- CGIBusy = false; -->
+		<!-- } -->
+	<!-- } -->
+	<!-- XMLHttp.send(null); -->
+	
+	document.getElementById('display').innerHTML += word;
+	CGIBusy = false;
+	console.log(word);
 }
 
 </script>
