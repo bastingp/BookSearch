@@ -12,30 +12,34 @@
 #include "WORD_INDEXER_H.h"
 #include "fifo.h"
 
-using namespace std;
+using namespace std; 
 
-/* Fifo names */
-string receive_fifo = "GutenbergRequest";
-string send_fifo = "GutenbergReply";
-
-int i; 
 
 int main() 
 { 
+
+	/* Fifo names */
+	string receive_fifo = "GutenbergRequest";
+	string send_fifo = "GutenbergReply";
+
+	
+	Index index;	
+	
 	// create the FIFOs for communication
     Fifo recfifo(receive_fifo);
     Fifo sendfifo(send_fifo);
 	
-	string inMessage, outMessage;
+	string outMessage;
 	
 	
-	while(1){//this will keep running 
-	string matchLine;
-	string word;
+	while(1)
+	{//this will keep running 
+		string matchLine;
+		string word;
 		
 		//gets the input from CGI
 		recfifo.openread();
-        inMessage = recfifo.recv();
+        word = recfifo.recv();
 		
 		cout << "Word: " << endl; 
 		
@@ -44,8 +48,9 @@ int main()
 		
 		sendfifo.openwrite();
         sendfifo.send("</p>");
-        i = 0; 
-		do{
+        int i = 0; 
+		do
+		{
 			matchLine = index.GetInstancesOf(word, i);
 			if(i==0 && matchLine =="")
 			{

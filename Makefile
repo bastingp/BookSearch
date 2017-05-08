@@ -4,7 +4,7 @@
 # Put your user name below:
 USER= twitchelln
 
-CC= g++
+CC= g++ -std=c++11
 
 #For Optimization
 #CFLAGS= -O2
@@ -31,7 +31,7 @@ booksearchAJAX.o: booksearchAjax.cpp fifo.h
 testclient: testclient.o fifo.o
 	$(CC) testclient.o fifo.o -o testclient
 
-searchWordFiles: searchWordFiles.o fifo.o
+searchWordFiles: searchWordFiles.o fifo.o 
 	$(CC) searchWordFiles.o  fifo.o -o searchWordFiles
 	
 WORD_INDEXER: WORD_INDEXER.o
