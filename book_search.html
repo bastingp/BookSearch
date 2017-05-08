@@ -20,14 +20,15 @@ function getresponse ()
 	CGIBusy = true;
 	document.getElementById('display').innerHTML = "";		//wipe previous results
 
-    XMLHttp.open("GET", "/cgi-bin/schutzj_shakesfetchajax.cgi?"
-						 + "&word=" + word
-						 ,true);
+    <!-- XMLHttp.open("GET", "/cgi-bin/schutzj_shakesfetchajax.cgi?" -->
+						 <!-- + "&word=" + word -->
+						 <!-- ,true); -->
     XMLHttp.onreadystatechange=function() 
 	{
 		if(XMLHttp.readyState == 4)
 		{
-			document.getElementById('display').innerHTML += XMLHttp.responseText;			//update display with CGI response
+			<!-- document.getElementById('display').innerHTML += XMLHttp.responseText;			//update display with CGI response -->
+			document.getElementById('display').innerHTML += word;
 			CGIBusy = false;
 		}
 	}
