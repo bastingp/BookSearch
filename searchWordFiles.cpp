@@ -38,9 +38,10 @@ int main()
 		cout << "Word: " << word << endl;		
 		sendfifo.openwrite();		//initiates write lock 
         int i = 0; 
+        string matchLine;
 		do					//get every line instances for the word
 		{
-			string matchLine = index.GetInstancesOf(word, i);			//get the match line
+			matchLine = index.GetInstancesOf(word, i);			//get the match line
 			if(i==0 && matchLine =="")				//if i is 0, and no matching line is returned, then the word does not exist in the index
 			{
 				cout << "No Matches found for: "<<word<<endl;

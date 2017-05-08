@@ -8,7 +8,7 @@
 html{
 	background-repeat: no-repeat;
 	background-attachment: fixed;
-	background: url("bookshelf.jpg");
+	background: url("https://cslab.kenyon.edu/class/softdev/bastingp/project6/bookshelf.jpg");
 	height: 100%;
 }
 
@@ -81,7 +81,7 @@ p#bookDisplay{
 }
 
 .display{
-	height: 770px;
+	height: 100%;
 	width: 700px;
 	margin: 10px 0px 0px 150px;
 	word-wrap: break-word;
