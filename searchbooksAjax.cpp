@@ -23,19 +23,20 @@ using namespace cgicc; // Needed for AJAX functions.
 
 //Indeed, myString needs to be a copy of the original string
 
-std::string StringToUpper(std::string myString) {
-    const int length = myString.length();
-    for (int i = 0; i != length; ++i) {
-        myString[i] = std::toupper(myString[i]);
-    }
-    return myString;
-}
+// std::string StringToUpper(std::string myString) {
+    // const int length = myString.length();
+    // for (int i = 0; i != length; ++i) {
+        // myString[i] = std::toupper(myString[i]);
+    // }
+    // return myString;
+// }
 
 // fifo for communication
 string receive_fifo = "GutenbergReply";
 string send_fifo = "GutenbergRequest";
 
-int main() {
+int main() 
+{
 
     Cgicc cgi; // Ajax object
     char *cstr;
@@ -48,28 +49,24 @@ int main() {
 
     cout << "Content-Type: text/plain\n\n";
 
-    string stword = **word;
-    stword = StringToUpper(stword); //gets to upper case 
-    string message = stword;
+    string searchWord = **word;					//dereference pointer to get word from javascript
+    // stword = StringToUpper(stword); //gets to upper case 
 
 
     sendfifo.openwrite();
-    sendfifo.send(message);
+    sendfifo.send(searchWord);			//send the word to the server
 
     recfifo.openread();
-    string reply;
-
     cout << "</p>";
-
-    do {
-        /* Get a message from a server */
+	string reply;
+    do 					//get messages from server
+	{
         reply = recfifo.recv();
-        cout << "Line: " << reply << endl;
+        cout << "</p>" << reply;				//and send it back to the website
     } while (reply.find("$END") == string::npos);
+	
     recfifo.fifoclose();
-    sendfifo.fifoclose();
-
-
-
+    sendfifo.fifoclose();			//close FIFOs
+	
     return 0;
 }
