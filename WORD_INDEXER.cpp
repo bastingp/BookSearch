@@ -134,7 +134,7 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 {	
 	if(bookIDRef.empty())
 	{
-		BuildBookIDVector();
+		BuildBookIDVector(); //makes vector of book path postitions
 	}
 	MakeLower(word);
 	string newFileName = wordsDir+word+wordsFileType;
@@ -156,7 +156,7 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 				wordFile.read((char*)&value, sizeof(unsigned short int));
 				if (!wordFile.eof())
 				{
-					book = value;
+					book = value; //index for bookIDRef
 				}
 			} 
 			else
@@ -164,11 +164,11 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 				wordFile.read((char*)&value, sizeof(int));
 				if (!wordFile.eof())
 				{
-					position = value;
+					position = value; //position of line containing word in file
 					ifstream bookFile, bookPathIndex;
 					bookPathIndex.open(bookDir, ios::in); //file where paths are stored
 					bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
-					getline(bookPathIndex, bookPath);
+					getline(bookPathIndex, bookPath); //gets book path
 					if(CarefulOpenIn(bookFile, bookPath) && j == nextWordNum)
 					{
 						bookFile.seekg(position, bookFile.beg);
@@ -198,14 +198,14 @@ void Index::BuildBookIDVector()
 	string value;
 	bookIDRef.clear();
 	ifstream bookPathPositions;
-	bookPathPositions.open(bookPathPos, ios::in);
+	bookPathPositions.open(bookPathPos, ios::in); //file containing positions of paths in bookpath file
 	bookPathPositions.seekg(0,bookPathPositions.beg);
 	while(!bookPathPositions.eof())
 	{
 		getline(bookPathPositions,value);
 		if(value.length() >0)
 		{
-			bookIDRef.push_back(stol(value));
+			bookIDRef.push_back(stol(value)); //populates vector with values from file
 		}
 	}
 }
