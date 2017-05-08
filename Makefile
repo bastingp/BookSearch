@@ -13,39 +13,31 @@ CFLAGS= -g
 
 RM= /bin/rm -f
 
-all: searchWordFiles testclient booksearchAjax WORD_INDEXER PutCGI PutHTML
-#all: shakeserver testclient 
+all: searchWordFiles searchbooksAjax PutCGI PutHTML
 
-testclient.o: testclient.cpp fifo.h
-	$(CC) -c $(CFLAGS) testclient.cpp
 
 searchWordFiles.o: searchWordFiles.cpp fifo.h WORD_INDEXER_H.h
 	$(CC) -c $(CFLAGS) searchWordFiles.cpp
 	
-WORD_INDEXER.o: WORD_INDEXER_H.h
+WORD_INDEXER.o: WORD_INDEXER.cpp WORD_INDEXER_H.h
 	$(CC) -c $(CFLAGS) WORD_INDEXER.cpp
 	
-booksearchAJAX.o: booksearchAjax.cpp fifo.h
-	$(CC) -c $(CFLAGS) booksearchAjax.cpp
+searchbooksAJAX.o: searchbooksAjax.cpp fifo.h
+	$(CC) -c $(CFLAGS) searchbooksAjax.cpp
 
-testclient: testclient.o fifo.o
-	$(CC) testclient.o fifo.o -o testclient
 
-searchWordFiles: searchWordFiles.o fifo.o 
-	$(CC) searchWordFiles.o  fifo.o -o searchWordFiles
-	
-WORD_INDEXER: WORD_INDEXER.o
-	$(CC) WORD_INDEXER.o -o WORD_INDEXER
+searchWordFiles: searchWordFiles.o fifo.o WORD_INDEXER.o 
+	$(CC) searchWordFiles.o WORD_INDEXER.o fifo.o -o searchWordFiles
 	
 fifo.o:		fifo.cpp fifo.h
 		g++ -c fifo.cpp
 		
-booksearchAjax: booksearchAjax.o  fifo.h
-	$(CC) booksearchAjax.o  fifo.o -o bookSearchAjax -L/usr/local/lib -lcgicc
+searchbooksAjax: searchbooksAjax.o  fifo.h
+	$(CC) searchbooksAjax.o  fifo.o -o searchbooksAjax -L/usr/local/lib -lcgicc
 
-PutCGI: booksearchAjax
-	chmod 757 booksearchajax
-	cp shakeajax /usr/lib/cgi-bin/$(USER)_booksearchAjax.cgi 
+PutCGI: searchbooksAjax
+	chmod 757 searchbooksAjax
+	cp searchbooksAjax /usr/lib/cgi-bin/$(USER)_searchbooksAjax.cgi 
 
 	echo "Current contents of your cgi-bin directory: "
 	ls -l /usr/lib/cgi-bin/
@@ -58,4 +50,4 @@ PutHTML:
 	ls -l /var/www/html/class/softdev/$(USER)
 
 clean:
-	rm -f *.o bookSearch_readouts_ajax searchWordFiles testclient
+	rm -f *.o bookSearch_readouts_ajax searchWordFiles 
