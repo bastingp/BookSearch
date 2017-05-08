@@ -8,7 +8,7 @@
 html{
 	background-repeat: no-repeat;
 	background-attachment: fixed;
-	background: url("bookshelf.jpg");
+	background: url("https://cslab.kenyon.edu/class/softdev/bastingp/project6/bookshelf.jpg");
 	height: 100%;
 }
 

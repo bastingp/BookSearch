@@ -45,7 +45,7 @@ int main()
 		
 		cout << "Word: " << endl; 
 
-		matchLines = index.GetInstancesOf(word);
+		matchLines = index.GetInstancesOf(word, int i);
 		
 		//initiates write lock 
 		
