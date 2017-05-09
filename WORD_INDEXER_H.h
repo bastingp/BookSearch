@@ -68,12 +68,14 @@ private:
 	void WriteMapToFile();
 
 	void BuildBookIDVector(); //populates vector when the index building is not run
+	
+	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookDir files
 
 	string dirRoot;
 	string path;
-	string bookDir = "books/book_paths.txt";
-	string bookPathPos = "books/bookPathPos.txt";
-	string wordsDir = "words/";
+	string bookDir = "/home/students/bastingp/project6/books/book_paths.txt";
+	string bookPathPos = "/home/students/bastingp/project6/books/bookPathPos.txt";
+	string wordsDir = "/home/students/bastingp/project6/words/";
 	string wordsFileType = ".bin";
 	pair <unsigned short int, int> wordPair;
 	map<string, BookMap> index;
@@ -81,6 +83,7 @@ private:
 	vector<long int> bookIDRef;
 	map<string, short int> stopWords;
 	int fileCount =0; 
+	vector<string> bookPaths;
 };
 
 #endif

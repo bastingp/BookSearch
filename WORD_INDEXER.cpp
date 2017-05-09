@@ -5,11 +5,14 @@ using namespace std;
 Index::Index()
 {
 	dirRoot = "";
+	BuildBookPathsMap();
+	
 }
 
 Index::Index(string rootDirectory)
 {
 	dirRoot = rootDirectory;
+	BuildBookPathsMap();
 }
 
 string Index::GetDirRoot()
@@ -46,6 +49,7 @@ void Index::Build()
 	ProcessDirectory("");		//process every file beginning at directory root
 	WriteMapToFile();		//ensures remaining map values ge written to file
 	pairIndex.clear();
+	BuildBookPathsMap();
 }
 
 void Index::ProcessDirectory(string directory)
@@ -132,16 +136,16 @@ void Index::ProcessFile(string file)
 
 vector<string> Index::GetInstancesOf(string word)
 {	
-	if(bookIDRef.empty())
-	{
-		BuildBookIDVector(); //makes vector of book path postitions
-	}
-	MakeLower(word);
-	string newFileName = wordsDir+word+wordsFileType;
-	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
+	// if(bookIDRef.empty())
+	// {
+		// BuildBookIDVector(); //makes vector of book path postitions
+	// }
+	MakeLower(word);		//normalize word
+	string newFileName = wordsDir+word+wordsFileType;			//get the word file name
+	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);		//open it to read in binary
 	int i = 0;
 	int value;
-	unsigned short int book;
+	unsigned short int bookIndex;
 	int position;
 	string bookPath="";
 	string line;
@@ -152,30 +156,32 @@ vector<string> Index::GetInstancesOf(string word)
 		{
 			if (i % 2 == 0) //alternates how the values are handled
 			{
-				wordFile.read((char*)&value, sizeof(unsigned short int));
-				if (!wordFile.eof())
-				{
-					book = value; //index for bookIDRef
-				}
+				wordFile.read((char*)&bookIndex, sizeof(unsigned short int));		//check which book to look in
+				// if (!wordFile.eof())
+				// {
+					// book = value; //index for bookIDRef
+				// }
+				
 			} 
 			else
 			{
-				wordFile.read((char*)&value, sizeof(int));
+				wordFile.read((char*)&position, sizeof(int));			//check where in the book to look
 				if (!wordFile.eof())
 				{
-					position = value; //position of line containing word in file
-					ifstream bookFile, bookPathIndex;
-					bookPathIndex.open(bookDir, ios::in); //file where paths are stored
-					bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
-					getline(bookPathIndex, bookPath); //gets book path
-					if(CarefulOpenIn(bookFile, bookPath))
+					// position = value; //position of line containing word in file
+					ifstream bookFile;
+					// bookPathIndex.open(bookDir, ios::in); //file where paths are stored
+					// bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
+					// getline(bookPathIndex, bookPath); //gets book path
+					if(CarefulOpenIn(bookFile, bookPaths.at(bookIndex)))			//open the book file
 					{
-						bookFile.seekg(position, bookFile.beg);
+						bookFile.seekg(position, bookFile.beg);					//and move to the offset
 						getline(bookFile, line);
 						//get title
 						//string bookFileName = bookPath.erase(0,bookPath.length()-12);
 						//instancesOfWord.push_back(bookFileName+":");
-						instancesOfWord.push_back(line);
+						instancesOfWord.push_back(line);				//add the line to instancesOfWord
+						cout << line << endl;
 					}
 				}
 			}
@@ -395,5 +401,31 @@ string Index::GetTitle(ifstream& infile)
 	string line;
 	infile.seekg(pos, infile.beg);
 	getline(infile, line);
+}
+
+void Index::BuildBookPathsMap()
+{
+	ifstream infile;
+	if(CarefulOpenIn(infile, bookDir))
+	{
+		bookPaths.clear();
+		string line;
+		while(!infile.eof())
+		{
+			getline(infile, line);
+			cout << line << endl;
+			bookPaths.push_back(line);
+		}
+		
+		infile.close();
+	}
+	else
+	{
+		cout << "\n\nERROR: Couldn't open book paths file\n\n";
+	}
+	
+	stringstream iss;
+	iss << bookPaths.size();
+	cout << "\n\nTotal book paths: " << iss.str();
 }
 
