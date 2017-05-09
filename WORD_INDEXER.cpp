@@ -223,40 +223,6 @@ void Index::WriteMapToFile(){
 	}
 }
 
-/////////////////////////////////////
-//NOT CURRENTLY USING THIS FUNCTION//
-/////////////////////////////////////
-vector<string> Index::GetInstancesOfWordInFile(string filePath, vector<int> positions)
-{
-	vector<string> lines;
-	ifstream infile;
-	if(CarefulOpenIn(infile, filePath))
-	{
-		string line, word;
-		int last_pos = -1;
-		for(int i = 0; i < positions.size(); i++)			//output lines starting at each position
-		{
-			infile.seekg(positions[i], infile.beg);
-			getline(infile, line);
-			if(positions[i] != last_pos)							//don't output same line multiple times
-			{
-				istringstream iss(line);
-				line = "";
-				while(iss >> word)					//add each word into line
-				{
-					line += word + " ";
-				}
-			}
-			last_pos = positions[i];
-			lines.push_back(line);
-		}
-		
-		infile.close();
-	}
-	
-	return lines;
-}
-
 BookMap Index::GetLocations(string word)
 {
 	map<string, BookMap>::iterator it;
