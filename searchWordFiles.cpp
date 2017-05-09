@@ -35,23 +35,22 @@ int main()
 		
 		cout << "Word: " << word << endl;		
 		sendfifo.openwrite();		//initiates write lock 
-        int i = 0; 
-        string matchLine;
-		do					//get every line instances for the word
+		
+        vector<string> lineInstances;
+		lineInstances = index.GetInstancesOf(word);			//get the matching lines
+		if(linesInstances.empty())				//if no matching line is returned, then the word does not exist in the index
 		{
-			matchLine = index.GetInstancesOf(word, i);			//get the match line
-			if(i==0 && matchLine =="")				//if i is 0, and no matching line is returned, then the word does not exist in the index
+			cout << "No Matches found for: "<<word<<endl;
+			sendfifo.send(wordNotFoundMessage);					
+		}
+		else
+		{
+			for(int i = 0; i < linesInstances.size(); i++)		//otherwise, send CGI every line
 			{
-				cout << "No Matches found for: "<<word<<endl;
-				sendfifo.send(wordNotFoundMessage);					
+				cout << lineInstances[i] << endl;
+				sendfifo.send(lineInstances[i]); 
 			}
-			else
-			{
-				cout << matchLine << endl;
-				sendfifo.send(matchLine); 
-				i++;									//increment i to get the next line
-			}
-		}while(matchLine != "");
+		}
 
 		cout << "$END\n"; 
 		sendfifo.send("$END");				//let CGI know that loop is over
