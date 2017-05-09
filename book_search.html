@@ -2,6 +2,7 @@
 
 <html>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script type = "text/javascript">
 var XMLHttp;
 var CGIBusy;
@@ -41,26 +42,14 @@ function getresponse ()
 		}
 	}
 	XMLHttp.send(null);
-	
-	<!-- for(var i = 0; i < 1000; i++) -->
-	<!-- { -->
-		<!-- document.getElementById('responseArea').innerHTML += word; -->
-		<!-- document.getElementById('responseArea').innerHTML += '</p>'; -->
-	<!-- } -->
-	
-	<!-- CGIBusy = false; -->
-	<!-- console.log(word); -->
 }
 
-function checkEnterKey()
-{
-	console.log("Hit a key");
-	if(event.keyCode == 13) 
-	{
-	console.log("Hit enter key");
+$(document).keypress(function(e) {
+    if(e.which == 13) {
+        console.log("you pressed enter!");
 		getresponse();
-	}
-}
+    }
+});
 
 </script>
 
@@ -79,7 +68,7 @@ function checkEnterKey()
 
 		<div class = "search">
 			<input type="text" id="word" class = "text_input" maxlength="20"></input>
-			<input class="Button" type="submit" onclick="getresponse()" value="Search">
+			<input class="Button" id="button" type="submit" onclick="getresponse()" value="Search">
 		</div>
 		<div class = "main">
 		<div class = "display" id="responseArea">
