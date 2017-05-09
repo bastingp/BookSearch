@@ -3,13 +3,14 @@
 <html>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
 <script type = "text/javascript">
 var XMLHttp;
 var CGIBusy;
 			
 function pageInit()
 {
-	var CGIBusy = false;
+	var CGIBusy = false;	//creates an XML object
 	if(navigator.appName == "Microsoft Internet Explorer") {
 		XMLHttp = new ActiveXObject("Microsoft.XMLHTTP");
 	} else {
@@ -48,33 +49,32 @@ $(document).keypress(function(e) {
     if(e.which == 13) {
         console.log("you pressed enter!");
 		getresponse();
-    }
+    }//allows the enter button to send code in. 
 });
 
-</script>
+</script> 
 
-	<head>
-		<title>Book Search</title>
-    	<link rel="stylesheet" type="text/css" href="book_search.css">
-	</head>
-	<h1>Project Gutenberg: Book Search</h1>
+<head>
+	<title>Book Search</title>
+    <link rel="stylesheet" type="text/css" href="book_search.css">
+</head>
+	
+<h1>Project Gutenberg: Book Search</h1>
 
-	<body onLoad="pageInit()">
-		<div class ="head">
-		</div>
-		<div class = "instructions">
-		Enter a word to search for in the Gutenberg collection
-		</div>
+<body onLoad="pageInit()">
+	<div class ="head"></div>
+		
+	<div class = "instructions">Enter a word to search for in the Gutenberg collection</div>
 
-		<div class = "search">
-			<input type="text" id="word" class = "text_input" maxlength="20"></input>
-			<input class="Button" id="button" type="submit" onclick="getresponse()" value="Search">
-		</div>
-		<div class = "main">
-		<div class = "display" id="responseArea">
-		</div>
-		</div>
+	<div class = "search"> 
+		<input type="text" id="word" class = "text_input" maxlength="20"></input>
+		<input class="Button" id="button" type="submit" onclick="getresponse()" value="Search">
+	</div>
+		
+	<div class = "main">
+		<div class = "display" id="responseArea"></div>
+	</div>
 
-	</body>
+</body>
 
 </html>
