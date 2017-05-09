@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <iostream>
@@ -17,7 +16,6 @@ using namespace std;
 
 int main() 
 { 
-
 	/* Fifo names */
 	string receive_fifo = "GutenbergRequest";
 	string send_fifo = "GutenbergReply";
