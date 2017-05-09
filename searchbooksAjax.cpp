@@ -18,19 +18,6 @@
 using namespace std;
 using namespace cgicc; // Needed for AJAX functions.
 
-// Possible values returned by results_select
-#define WORD "$Word"
-
-//Indeed, myString needs to be a copy of the original string
-
-// std::string StringToUpper(std::string myString) {
-    // const int length = myString.length();
-    // for (int i = 0; i != length; ++i) {
-        // myString[i] = std::toupper(myString[i]);
-    // }
-    // return myString;
-// }
-
 // fifo for communication
 string receive_fifo = "GutenbergReply";
 string send_fifo = "GutenbergRequest";
@@ -50,18 +37,17 @@ int main()
     cout << "Content-Type: text/plain\n\n";
 
     string searchWord = **word;					//dereference pointer to get word from javascript
-    // stword = StringToUpper(stword); //gets to upper case 
-
 
     sendfifo.openwrite();
     sendfifo.send(searchWord);			//send the word to the server
 
     recfifo.openread();
+    
 	string reply;
     do 					//get messages from server
 	{
         reply = recfifo.recv();
-		if(reply.find("$END") == string::npos)
+		if(reply.find("$END") == string::npos)			//stops when it finds the end message
 		{
 			cout << "</p><br><br>" << reply;				//and send it back to the website
 		}
