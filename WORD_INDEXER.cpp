@@ -136,65 +136,28 @@ void Index::ProcessFile(string file)
 
 vector<string> Index::GetInstancesOf(string word)
 {	
-	// if(bookIDRef.empty())
-	// {
-		// BuildBookIDVector(); //makes vector of book path postitions
-	// }
-	MakeLower(word);		//normalize word
-	string newFileName = wordsDir+word+wordsFileType;			//get the word file name
-	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);		//open it to read in binary
-	int i = 0;
-	int value;
-	unsigned short int bookIndex;
-	int position;
-	string bookPath="";
-	string line;
 	vector<string> instancesOfWord;
-	if (wordFile.is_open())
+	map<unsigned short int, vector<int> > wordMap;	
+	BuildWordMap(word, wordMap);
+	
+	map<unsigned short int, vector<int> >::iterator it;
+	string line;
+	for(it = wordMap.begin(); it != wordMap.end(); it++)		//read through every book the word appears in
 	{
-		while (!wordFile.eof())
+		ifstream bookfile;
+		if(CarefulOpenIn(bookfile, bookPaths.at(it->first)))		//open each book file
 		{
-			if (i % 2 == 0) //alternates how the values are handled
+			for(int j = 0; j < it->second.size(); j++)		//and get each line in the book the word appears in
 			{
-				wordFile.read((char*)&bookIndex, sizeof(unsigned short int));		//check which book to look in
-				// if (!wordFile.eof())
-				// {
-					// book = value; //index for bookIDRef
-				// }
-				
-			} 
-			else
-			{
-				wordFile.read((char*)&position, sizeof(int));			//check where in the book to look
-				if (!wordFile.eof())
-				{
-					// position = value; //position of line containing word in file
-					ifstream bookFile;
-					// bookPathIndex.open(bookDir, ios::in); //file where paths are stored
-					// bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
-					// getline(bookPathIndex, bookPath); //gets book path
-					if(CarefulOpenIn(bookFile, bookPaths.at(bookIndex)))			//open the book file
-					{
-						bookFile.seekg(position, bookFile.beg);					//and move to the offset
-						getline(bookFile, line);
-						//get title
-						//string bookFileName = bookPath.erase(0,bookPath.length()-12);
-						//instancesOfWord.push_back(bookFileName+":");
-						instancesOfWord.push_back(line);				//add the line to instancesOfWord
-						cout << line << endl;
-					}
-				}
+				bookfile.seekg(it->second.at(j), bookfile.beg);					//and move to the offset
+				getline(bookfile, line);
+				instancesOfWord.push_back(line);				//add the line to instancesOfWord
+				cout << line << endl;
 			}
-			i++;
 		}
-		return instancesOfWord;
 	}
-	else //couldnt find word file aka there were no instances stored of that word
-	{
-		instancesOfWord.clear();
-		return instancesOfWord;
-	}
-
+	
+	return instancesOfWord;
 }
 
 void Index::BuildBookIDVector()
@@ -427,5 +390,37 @@ void Index::BuildBookPathsMap()
 	stringstream iss;
 	iss << bookPaths.size();
 	cout << "\n\nTotal book paths: " << iss.str();
+}
+
+void Index::BuildWordMap(string word, map<unsigned short int, vector<int> >& wordMap)
+{
+	MakeLower(word);		//normalize word
+	string newFileName = wordsDir+word+wordsFileType;			//get the word file name
+	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);		//open it to read in binary
+	
+	if(wordFile.fail())		//word doesn't exist, just return
+	{
+		cout << "\nNo file for word...\n";
+		return;
+	}
+	
+	wordMap.clear();			//clear out word map just in case, to ensure there's no garbage
+	
+	unsigned short int bookIndex;
+	int offset;
+	if (wordFile.is_open())
+	{
+		while (!wordFile.eof())		//read through whole file
+		{
+			wordFile.read((char*)&bookIndex, sizeof(unsigned short int));		//check which book to look in
+			if(wordFile.eof())		//don't add extra junk at the end of the file
+			{
+				break;
+			}
+			wordFile.read((char*)&offset, sizeof(int));			//check where in the book to look
+			
+			wordMap[bookIndex].push_back(offset);		//add entry to our map
+		}
+	}
 }
 

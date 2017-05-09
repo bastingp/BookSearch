@@ -70,6 +70,8 @@ private:
 	void BuildBookIDVector(); //populates vector when the index building is not run
 	
 	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookDir files
+	
+	void BuildWordMap(string word, map<unsigned short int, vector<int> >& wordMap);
 
 	string dirRoot;
 	string path;
