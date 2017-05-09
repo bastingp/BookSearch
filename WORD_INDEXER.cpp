@@ -6,13 +6,14 @@ Index::Index()
 {
 	dirRoot = "";
 	BuildBookPathsMap();
-	
+	BuildBookInfo();
 }
 
 Index::Index(string rootDirectory)
 {
 	dirRoot = rootDirectory;
 	BuildBookPathsMap();
+	BuildBookInfo();
 }
 
 string Index::GetDirRoot()
@@ -50,6 +51,7 @@ void Index::Build()
 	WriteMapToFile();		//ensures remaining map values ge written to file
 	pairIndex.clear();
 	BuildBookPathsMap();
+	BuildBookInfo();
 }
 
 void Index::ProcessDirectory(string directory)
@@ -144,6 +146,7 @@ vector<string> Index::GetInstancesOf(string word)
 	string line;
 	for(it = wordMap.begin(); it != wordMap.end(); it++)		//read through every book the word appears in
 	{
+		instancesOfWord.push_back(GetBookInfo(it->first));
 		ifstream bookfile;
 		if(CarefulOpenIn(bookfile, bookPaths.at(it->first)))		//open each book file
 		{
@@ -390,3 +393,46 @@ void Index::BuildWordMap(string word, map<unsigned short int, vector<int> >& wor
 	}
 }
 
+void Index::BuildBookInfo()
+{
+	const int MAX_LINE_SEARCH = 30;
+	const string infoIntro = "The Project Gutenberg EBook of ";
+	ifstream infile;
+	
+	for(int i = 0; i < bookPaths.size(); i++)		//for each book
+	{
+		if(CarefulOpenIn(infile, bookPaths.at(i)))		//open the file
+		{
+			string line;
+			for(int j = 0; j < MAX_LINE_SEARCH; j++)		//check the first few lines for a title
+			{
+				getline(infile, line);
+				size_t pos = line.find(infoIntro);
+				if(pos != string::npos)					//check if the line contains the infoIntro: if it does, store it
+				{
+					pos += infoIntro.size();		//move pos past "Title: "
+					bookInfo[i] = line.substr(pos);		//store the title in titles, with the correpsonding bookPath index
+				}
+			}
+			infile.close();
+		}
+	}
+}
+
+string Index::GetBookInfo(int i)
+{
+	map<int, string>::iterator it;	
+	
+	it = bookInfo.find(i);
+    if (it != bookInfo.end())
+	{
+		string info = "<br><i><b>";
+		info += bookInfo[i] + ": ";
+		info += "</i></b>";
+        return info;
+    } 
+	else 
+	{
+        return "";
+    }
+}

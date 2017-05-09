@@ -63,7 +63,7 @@ int main()
         reply = recfifo.recv();
 		if(reply.find("$END") == string::npos)
 		{
-			cout << "</p><br><br>" << reply;				//and send it back to the website
+			cout << "</p><br>" << reply;				//and send it back to the website
 		}
 		else
 		{

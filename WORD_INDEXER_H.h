@@ -72,6 +72,10 @@ private:
 	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookDir files
 	
 	void BuildWordMap(string word, map<unsigned short int, vector<int> >& wordMap);
+	
+	void BuildBookInfo();
+	
+	string GetBookInfo(int i);
 
 	string dirRoot;
 	string path;
@@ -86,6 +90,10 @@ private:
 	map<string, short int> stopWords;
 	int fileCount =0; 
 	vector<string> bookPaths;
+	// map<int, string> titles;
+	// map<int, string> authors;
+	
+	map<int, string> bookInfo;
 };
 
 #endif
