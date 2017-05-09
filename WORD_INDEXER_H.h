@@ -40,6 +40,8 @@ public:
 	
 	vector<string> GetInstancesOf(string word);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
 	
+	vector<string> GetInstancesOf(string word, int startingIndex, int numBooks);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
+	
 private:
 	void ProcessDirectory(string directory);		//looks at every entity in a directory
 	
@@ -71,7 +73,7 @@ private:
 	
 	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookDir files
 	
-	void BuildWordMap(string word, map<unsigned short int, vector<int> >& wordMap);
+	void BuildWordMap(string word);
 	
 	void BuildBookInfo();
 	
@@ -89,11 +91,10 @@ private:
 	vector<long int> bookIDRef;
 	map<string, short int> stopWords;
 	int fileCount =0; 
-	vector<string> bookPaths;
-	// map<int, string> titles;
-	// map<int, string> authors;
-	
+	vector<string> bookPaths;	
 	map<int, string> bookInfo;
+	string lastWordSearchedFor;
+	map<unsigned short int, vector<int> > wordMap;
 };
 
 #endif

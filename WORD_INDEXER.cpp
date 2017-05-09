@@ -5,15 +5,25 @@ using namespace std;
 Index::Index()
 {
 	dirRoot = "";
+	lastWordSearchedFor = "";
+	
+	cout << "\n\nBuilding book map....\n\n";
 	BuildBookPathsMap();
+	
+	cout << "\n\nBuilding book info map...\n\n";
 	BuildBookInfo();
+	cout << "\n\nDone building\n\n";
 }
 
 Index::Index(string rootDirectory)
 {
 	dirRoot = rootDirectory;
+	lastWordSearchedFor = "";
+	cout << "\n\nBuilding book map....\n\n";
 	BuildBookPathsMap();
+	cout << "\n\nBuilding book info map...\n\n";
 	BuildBookInfo();
+	cout << "\n\nDone building\n\n";
 }
 
 string Index::GetDirRoot()
@@ -24,6 +34,7 @@ string Index::GetDirRoot()
 void Index::Reset()
 {
 	dirRoot = "";
+	lastWordSearchedFor = "";
 	index.clear();
 	bookIDRef.clear();
 }
@@ -139,8 +150,12 @@ void Index::ProcessFile(string file)
 vector<string> Index::GetInstancesOf(string word)
 {	
 	vector<string> instancesOfWord;
-	map<unsigned short int, vector<int> > wordMap;	
-	BuildWordMap(word, wordMap);
+	MakeLower(word);
+	if(lastWordSearchedFor != word)
+	{
+		BuildWordMap(word);
+		lastWordSearchedFor = word;
+	}
 	
 	map<unsigned short int, vector<int> >::iterator it;
 	string line;
@@ -155,7 +170,46 @@ vector<string> Index::GetInstancesOf(string word)
 				bookfile.seekg(it->second.at(j), bookfile.beg);					//and move to the offset
 				getline(bookfile, line);
 				instancesOfWord.push_back(line);				//add the line to instancesOfWord
-				cout << line << endl;
+			}
+		}
+	}
+	
+	return instancesOfWord;
+}
+
+vector<string> Index::GetInstancesOf(string word, int startingIndex, int numBooks)
+{
+	vector<string> instancesOfWord;
+	MakeLower(word);
+	if(lastWordSearchedFor != word)
+	{
+		BuildWordMap(word);
+		lastWordSearchedFor = word;
+	}
+	
+	map<unsigned short int, vector<int> >::iterator it;
+	map<unsigned short int, vector<int> >::iterator endPos;
+	string line;
+	
+	if(startingIndex >= wordMap.size())		//if startingIndex is out of map range, just return empty vector
+	{
+		return instancesOfWord;
+	}
+	
+	it = wordMap.begin();
+	endPos = wordMap.begin();
+	advance(endPos, (startingIndex + numBooks));
+	for(advance(it, startingIndex); (it != wordMap.end()) && (it != endPos); it++)		//read through numBooks number of books the word appears in,
+	{																																	//starting at startingIndex
+		instancesOfWord.push_back(GetBookInfo(it->first));
+		ifstream bookfile;
+		if(CarefulOpenIn(bookfile, bookPaths.at(it->first)))		//open each book file
+		{
+			for(int j = 0; j < it->second.size(); j++)		//and get each line in the book the word appears in
+			{
+				bookfile.seekg(it->second.at(j), bookfile.beg);					//and move to the offset
+				getline(bookfile, line);
+				instancesOfWord.push_back(line);				//add the line to instancesOfWord
 			}
 		}
 	}
@@ -361,8 +415,12 @@ void Index::BuildBookPathsMap()
 	cout << "\n\nTotal book paths: " << iss.str();
 }
 
-void Index::BuildWordMap(string word, map<unsigned short int, vector<int> >& wordMap)
+void Index::BuildWordMap(string word)
 {
+	cout << "\n\n\n******************************************************************************\n" 
+		 << "building map for " << word << ". Last word searched for was " << lastWordSearchedFor 
+		 << "\n******************************************************************************\n\n\n";
+	
 	MakeLower(word);		//normalize word
 	string newFileName = wordsDir+word+wordsFileType;			//get the word file name
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);		//open it to read in binary
@@ -373,7 +431,7 @@ void Index::BuildWordMap(string word, map<unsigned short int, vector<int> >& wor
 		return;
 	}
 	
-	wordMap.clear();			//clear out word map just in case, to ensure there's no garbage
+	wordMap.clear();			//clear out word map from last word searched for
 	
 	unsigned short int bookIndex;
 	int offset;
@@ -403,6 +461,7 @@ void Index::BuildBookInfo()
 	{
 		if(CarefulOpenIn(infile, bookPaths.at(i)))		//open the file
 		{
+			cout << "\nGetting info for " << bookPaths.at(i) << endl;
 			string line;
 			for(int j = 0; j < MAX_LINE_SEARCH; j++)		//check the first few lines for a title
 			{
@@ -421,6 +480,8 @@ void Index::BuildBookInfo()
 
 string Index::GetBookInfo(int i)
 {
+	cout << "\nGetting book " << bookPaths.at(i) << endl;
+	
 	map<int, string>::iterator it;	
 	
 	it = bookInfo.find(i);

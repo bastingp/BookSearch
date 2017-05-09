@@ -36,8 +36,31 @@ int main()
 		cout << "Word: " << word << endl;		
 		sendfifo.openwrite();		//initiates write lock 
 		
-        vector<string> lineInstances;
-		lineInstances = index.GetInstancesOf(word);			//get the matching lines
+		
+		// const int BOOK_SEARCH_INTERVAL = 10000;
+		// vector<string> lineInstances = index.GetInstancesOf(word, 0, BOOK_SEARCH_INTERVAL);
+		// if(lineInstances.empty())
+		// {
+			// cout << "No Matches found for: "<<word<<endl;
+			// sendfifo.send(wordNotFoundMessage);	
+		// }
+		// else
+		// {
+			// for(int i = BOOK_SEARCH_INTERVAL; !lineInstances.empty(); i+= BOOK_SEARCH_INTERVAL)
+			// {
+				// for(int j = 0; j < lineInstances.size(); j++)
+				// {
+					// cout << lineInstances[j] << endl;
+					// sendfifo.send(lineInstances[j]);
+				// }
+				// lineInstances = index.GetInstancesOf(word, i, BOOK_SEARCH_INTERVAL);
+			// }
+		// }
+		
+		
+		
+		
+		vector<string> lineInstances = index.GetInstancesOf(word);			//get the matching lines
 		if(lineInstances.empty())				//if no matching line is returned, then the word does not exist in the index
 		{
 			cout << "No Matches found for: "<<word<<endl;
