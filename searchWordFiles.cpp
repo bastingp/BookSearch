@@ -38,14 +38,14 @@ int main()
 		
         vector<string> lineInstances;
 		lineInstances = index.GetInstancesOf(word);			//get the matching lines
-		if(linesInstances.empty())				//if no matching line is returned, then the word does not exist in the index
+		if(lineInstances.empty())				//if no matching line is returned, then the word does not exist in the index
 		{
 			cout << "No Matches found for: "<<word<<endl;
 			sendfifo.send(wordNotFoundMessage);					
 		}
 		else
 		{
-			for(int i = 0; i < linesInstances.size(); i++)		//otherwise, send CGI every line
+			for(int i = 0; i < lineInstances.size(); i++)		//otherwise, send CGI every line
 			{
 				cout << lineInstances[i] << endl;
 				sendfifo.send(lineInstances[i]); 

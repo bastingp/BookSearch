@@ -130,7 +130,7 @@ void Index::ProcessFile(string file)
 	}
 }
 
-string Index::GetInstancesOf(string word, int nextWordNum)
+vector<string> Index::GetInstancesOf(string word)
 {	
 	if(bookIDRef.empty())
 	{
@@ -140,16 +140,15 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 	string newFileName = wordsDir+word+wordsFileType;
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);
 	int i = 0;
-	int j = 0;
 	int value;
 	unsigned short int book;
 	int position;
 	string bookPath="";
 	string line;
-	string instanceOfWord="";
+	vector<string> instancesOfWord;
 	if (wordFile.is_open())
 	{
-		while (!wordFile.eof() && j <= nextWordNum)
+		while (!wordFile.eof())
 		{
 			if (i % 2 == 0) //alternates how the values are handled
 			{
@@ -169,26 +168,25 @@ string Index::GetInstancesOf(string word, int nextWordNum)
 					bookPathIndex.open(bookDir, ios::in); //file where paths are stored
 					bookPathIndex.seekg(bookIDRef[book], bookPathIndex.beg);
 					getline(bookPathIndex, bookPath); //gets book path
-					if(CarefulOpenIn(bookFile, bookPath) && j == nextWordNum)
+					if(CarefulOpenIn(bookFile, bookPath))
 					{
 						bookFile.seekg(position, bookFile.beg);
 						getline(bookFile, line);
 						//get title
 						//string bookFileName = bookPath.erase(0,bookPath.length()-12);
 						//instancesOfWord.push_back(bookFileName+":");
-						instanceOfWord = line;
+						instancesOfWord.push_back(line);
 					}
-					j++;
 				}
 			}
 			i++;
 		}
-		return instanceOfWord;
+		return instancesOfWord;
 	}
 	else //couldnt find word file aka there were no instances stored of that word
 	{
-		instanceOfWord = "";
-		return instanceOfWord;
+		instancesOfWord.clear();
+		return instancesOfWord;
 	}
 
 }

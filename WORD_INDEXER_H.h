@@ -38,7 +38,7 @@ public:
 	
 	void Build();			//builds index of every word in every file in the directory root
 	
-	string GetInstancesOf(string word, int nextWordNum);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
+	vector<string> GetInstancesOf(string word);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
 	
 private:
 	void ProcessDirectory(string directory);		//looks at every entity in a directory
