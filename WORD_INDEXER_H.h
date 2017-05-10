@@ -17,16 +17,10 @@
 
 using namespace std;
 
-struct BookMap
-{
-	map<unsigned short int, vector<int> > bookOffsets;
-};
-
-
 class Index
 {
 public:
-	Index();		//creates index with no reference to a directory too
+	Index();		//creates index with no reference to a directory
 	
 	Index(string rootDirectory);		//creates index to build from the directory root
 	
@@ -34,13 +28,13 @@ public:
 	
 	void ChangeDirRoot(string newRoot);	//changes directory root to newRoot, and clears out index and bookIDRef
 	
-	void Reset();			//sets dirRoot to empty string, clears index, clears bookIDRef
+	void Reset();			//resets all info to defaults
 	
 	void Build();			//builds index of every word in every file in the directory root
 	
 	vector<string> GetInstancesOf(string word);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
 	
-	vector<string> GetInstancesOf(string word, int startingIndex, int numBooks);		//returns every line in every file in every subdirectory of dirRoot containing the word "word"
+	vector<string> GetInstancesOf(string word, int startingIndex, int numBooks);		//returns every line in numBooks number of files, beginning at startingIndex for word word
 	
 private:
 	void ProcessDirectory(string directory);		//looks at every entity in a directory
@@ -49,52 +43,43 @@ private:
 	
 	void ProcessFile(string file);					//reads through the file, and adds it to our index
 
-	bool CarefulOpenIn(ifstream& infile, string name);		//opens file, exits program if attempt fails
+	bool CarefulOpenIn(ifstream& infile, string name);		//opens file, returns false if attempt fails
 	
-	BookMap GetLocations(string word);				//returns WordLocations of word in index--returns an empty WordLocations if word not in index
+	void MakeLower(string& word);		//changes everything to lowercase, removes punctuation
 	
-	vector<string> GetInstancesOfWordInFile(string filePath, vector<int> positions);		//returns all instances of word in filePath
+	bool hasEnding (string const &fullString, string const &ending);			//returns true if fullString ends with "ending"
 	
-	void MakeLower(string& word);
-	
-	bool hasEnding (string const &fullString, string const &ending);
-	
-	void BuildStopWords(); //builds a function from stopwords.txt 
+	void BuildStopWords(); //builds a stopWords map from stopwords.txt 
 	
 	bool IsStopWord (string word); // checks to see if the word is a stopWord
 
-	string GetTitle(ifstream& infile); //finds the title of the book from a given text file
+	void AddWordsToMap(unsigned short int bookIndex, string bookPath);		//builds pairIndex from bookPath file
 
-	void AddWordsToMap(unsigned short int bookIndex, string bookPath);
+	void WriteMapToFile();			//writes all book paths and offsets to each word file, clears buffer
+	
+	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookPathsFile
+	
+	void BuildWordMap(string word);			//builds map from file associated with word, to store locally
+	
+	void BuildBookInfo();			//builds map of info for each book to store locally
+	
+	string GetBookInfo(int bookIndex);		//returns the book info for the book at bookIndex 
+	
+	/* Variables for searching index */
+	vector<string> bookPaths;		//stores all book paths search word appears in
+	map<int, string> bookInfo;		//stores all book info search word appears in
+	string lastWordSearchedFor;		//remembers the last word user searched for, so that wordMap doesn't need to be rebuilt
+	map<unsigned short int, vector<int> > wordMap;		//stores in memory all books and offsets word appears in
 
-	void WriteMapToFile();
-
-	void BuildBookIDVector(); //populates vector when the index building is not run
-	
-	void BuildBookPathsMap();  //builds a vector of book path strings based on the bookDir files
-	
-	void BuildWordMap(string word);
-	
-	void BuildBookInfo();
-	
-	string GetBookInfo(int i);
-
-	string dirRoot;
-	string path;
-	string bookDir = "/home/students/bastingp/project6/books/book_paths.txt";
-	string bookPathPos = "/home/students/bastingp/project6/books/bookPathPos.txt";
-	string wordsDir = "/home/students/bastingp/project6/words/";
-	string wordsFileType = ".bin";
-	pair <unsigned short int, int> wordPair;
-	map<string, BookMap> index;
-	map<string, vector<pair<unsigned short int, int> > > pairIndex;
-	vector<long int> bookIDRef;
-	map<string, short int> stopWords;
-	int fileCount =0; 
-	vector<string> bookPaths;	
-	map<int, string> bookInfo;
-	string lastWordSearchedFor;
-	map<unsigned short int, vector<int> > wordMap;
+	/* Variables for building index */
+	string dirRoot;				//root from which index is built
+	string path;				//used recursively to traverse directories while building index
+	const string bookPathsFile = "/home/students/bastingp/project6/books/book_paths.txt";		//dir containing file which contains all paths for all files
+	const string wordsDir = "/home/students/bastingp/project6/words/";			//directory where word files are stored
+	const string wordsFileType = ".bin";								//file type for word files
+	map<string, vector<pair<unsigned short int, int> > > wordBuildMap;		//used to store word info in buffer before writing to files
+	map<string, short int> stopWords;				//list of stop words for search
+	int fileCount =0; 			//counts the number of files in storage
 };
 
 #endif

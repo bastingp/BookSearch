@@ -5,24 +5,22 @@ using namespace std;
 Index::Index()
 {
 	dirRoot = "";
-	lastWordSearchedFor = "";
-	
+	lastWordSearchedFor = "";			//make search that this won't match user's first search
 	cout << "\n\nBuilding book map....\n\n";
-	BuildBookPathsMap();
-	
+	BuildBookPathsMap();						//store book paths in memory, to reduce file opening	
 	cout << "\n\nBuilding book info map...\n\n";
-	BuildBookInfo();
+	BuildBookInfo();							//store info for each book file in memory (title, author)
 	cout << "\n\nDone building\n\n";
 }
 
 Index::Index(string rootDirectory)
 {
 	dirRoot = rootDirectory;
-	lastWordSearchedFor = "";
+	lastWordSearchedFor = "";			//make search that this won't match user's first search
 	cout << "\n\nBuilding book map....\n\n";
-	BuildBookPathsMap();
+	BuildBookPathsMap();						//store book paths in memory, to reduce file opening
 	cout << "\n\nBuilding book info map...\n\n";
-	BuildBookInfo();
+	BuildBookInfo();							//store info for each book file in memory (title, author)
 	cout << "\n\nDone building\n\n";
 }
 
@@ -35,8 +33,11 @@ void Index::Reset()
 {
 	dirRoot = "";
 	lastWordSearchedFor = "";
-	index.clear();
-	bookIDRef.clear();
+	wordBuildMap.clear();
+	bookPaths.clear();
+	bookInfo.clear();
+	wordMap.clear();
+	
 }
 
 void Index::ChangeDirRoot(string newRoot)
@@ -55,14 +56,13 @@ void Index::Build()
 		return;
 	}
 	
-	bookIDRef.clear();
 	path = dirRoot;			//begin the path at the directory root
 	BuildStopWords();
 	ProcessDirectory("");		//process every file beginning at directory root
-	WriteMapToFile();		//ensures remaining map values ge written to file
-	pairIndex.clear();
-	BuildBookPathsMap();
-	BuildBookInfo();
+	WriteMapToFile();		//any words leftover from buffer are written to file
+	wordBuildMap.clear();
+	BuildBookPathsMap();		//rebuild bookPath map now that there are files in the directories
+	BuildBookInfo();			//rebuild bookInfo map now that there are files in the directories
 }
 
 void Index::ProcessDirectory(string directory)
@@ -125,24 +125,21 @@ void Index::ProcessFile(string file)
 	string line, word;
 	if (hasEnding(file,fileType)) 		//Make sure it's a text file
 	{  
-		fileCount++;
+		fileCount++;			//we're reading a new file, so increment fileCount
 		cout << "processing file# "<<fileCount<<":"<<path << file <<endl;
-		string bookFileName = bookDir;
-		ofstream bookFile(bookFileName.c_str(), ios::out | ios::app); //opens file to output file paths to
-		long int booknum = bookFile.tellp();			//gets start location of path in file
-		bookIDRef.push_back(booknum);
-		ofstream bookVectorStorage(bookPathPos.c_str(), ios::out | ios::app); //stores book vector as file
-		bookVectorStorage << booknum << endl;
-		bookFile << (path + file);
-		bookFile << endl;
 		
+		ofstream bookFile(bookPathsFile.c_str(), ios::out | ios::app); //opens file to output file paths to
+		long int booknum = bookFile.tellp();			//gets start location of path in file
+		bookFile << (path + file);
+		bookFile << endl;		
 		bookFile.close();
-		unsigned short int bookPathIndex = bookIDRef.size() - 1;
-		AddWordsToMap(bookPathIndex, (path+file));
-		if (fileCount % 2000 == 0) //how many files stored in map
+		
+		unsigned short int bookPathIndex = fileCount - 1;
+		AddWordsToMap(bookPathIndex, (path+file));					//add words to buffer
+		if (fileCount % 2000 == 0) 		//every 2000 files we read, write map to files and clear the buffer
 		{			   //until written to file
 			WriteMapToFile();
-			pairIndex.clear();
+			wordBuildMap.clear();
 		}
 	}
 }
@@ -150,8 +147,8 @@ void Index::ProcessFile(string file)
 vector<string> Index::GetInstancesOf(string word)
 {	
 	vector<string> instancesOfWord;
-	MakeLower(word);
-	if(lastWordSearchedFor != word)
+	MakeLower(word);					//normalize word
+	if(lastWordSearchedFor != word)		//don't rebuild the wordMap if it's the same word as last time
 	{
 		BuildWordMap(word);
 		lastWordSearchedFor = word;
@@ -161,7 +158,7 @@ vector<string> Index::GetInstancesOf(string word)
 	string line;
 	for(it = wordMap.begin(); it != wordMap.end(); it++)		//read through every book the word appears in
 	{
-		instancesOfWord.push_back(GetBookInfo(it->first));
+		instancesOfWord.push_back(GetBookInfo(it->first));		//get info for book (title, author)
 		ifstream bookfile;
 		if(CarefulOpenIn(bookfile, bookPaths.at(it->first)))		//open each book file
 		{
@@ -180,8 +177,8 @@ vector<string> Index::GetInstancesOf(string word)
 vector<string> Index::GetInstancesOf(string word, int startingIndex, int numBooks)
 {
 	vector<string> instancesOfWord;
-	MakeLower(word);
-	if(lastWordSearchedFor != word)
+	MakeLower(word);					//normalize word
+	if(lastWordSearchedFor != word)		//don't rebuild the wordMap if it's the same word as last time
 	{
 		BuildWordMap(word);
 		lastWordSearchedFor = word;
@@ -196,12 +193,12 @@ vector<string> Index::GetInstancesOf(string word, int startingIndex, int numBook
 		return instancesOfWord;
 	}
 	
-	it = wordMap.begin();
+	it = wordMap.begin();		//set it to beginning of wordMap
 	endPos = wordMap.begin();
-	advance(endPos, (startingIndex + numBooks));
+	advance(endPos, (startingIndex + numBooks));		//move endPos numBooks beyond the startingIndex
 	for(advance(it, startingIndex); (it != wordMap.end()) && (it != endPos); it++)		//read through numBooks number of books the word appears in,
-	{																																	//starting at startingIndex
-		instancesOfWord.push_back(GetBookInfo(it->first));
+	{																					//starting at startingIndex
+		instancesOfWord.push_back(GetBookInfo(it->first));		//get info for book (title, author)
 		ifstream bookfile;
 		if(CarefulOpenIn(bookfile, bookPaths.at(it->first)))		//open each book file
 		{
@@ -217,27 +214,13 @@ vector<string> Index::GetInstancesOf(string word, int startingIndex, int numBook
 	return instancesOfWord;
 }
 
-void Index::BuildBookIDVector()
+void Index::AddWordsToMap(unsigned short int bookIndex, string bookPath)
 {
-	string value;
-	bookIDRef.clear();
-	ifstream bookPathPositions;
-	bookPathPositions.open(bookPathPos, ios::in); //file containing positions of paths in bookpath file
-	bookPathPositions.seekg(0,bookPathPositions.beg);
-	while(!bookPathPositions.eof())
-	{
-		getline(bookPathPositions,value);
-		if(value.length() >0)
-		{
-			bookIDRef.push_back(stol(value)); //populates vector with values from file
-		}
-	}
-}
-
-void Index::AddWordsToMap(unsigned short int bookIndex, string bookPath){
+	pair <unsigned short int, int> wordPair;
 	ifstream bookFile;
 	string line, word;
-	if(CarefulOpenIn(bookFile, bookPath)){
+	if(CarefulOpenIn(bookFile, bookPath))
+	{
 		int pos = 0;
 		while(!bookFile.fail())			//read through the whole file
 		{
@@ -245,33 +228,32 @@ void Index::AddWordsToMap(unsigned short int bookIndex, string bookPath){
 			istringstream iss(line);
 			while(iss >> word)				//read each word
 			{
-				MakeLower(word);
-				if (!IsStopWord(word)) //checks if it is a stop word
-				{			//store word as lower				
+				MakeLower(word);			//normalize word
+				if (!IsStopWord(word)) 	//don't store stop words
+				{			
 					wordPair = make_pair(bookIndex,pos);
-					pairIndex[word].push_back(wordPair);
+					wordBuildMap[word].push_back(wordPair);		//store pair in pairIndex
 				}
 			}
 			
-			pos = bookFile.tellg();
+			pos = bookFile.tellg();		//update pos to new filePosition
 		}
 		bookFile.close();
 	}
 }
 
-void Index::WriteMapToFile(){
+void Index::WriteMapToFile()
+{
 	cout << "writing words to word file...." << endl;
 	map<string, vector<pair<unsigned short int, int> > >::iterator it;
-	string fileName;
-	unsigned short int bookPathIndex;
-	int pos;
-	for (it = pairIndex.begin(); it != pairIndex.end(); it++) //for every key in the map
+	
+	for (it = wordBuildMap.begin(); it != wordBuildMap.end(); it++) //for every key in the map
 	{
 		for (int i = 0; i < it->second.size(); i++) 			//for every value in the vector of pairs
 		{
-			fileName = wordsDir + (it->first) + wordsFileType;
-			bookPathIndex = (it->second)[i].first; 				//first value from pair: book index in vector of book positions
-			pos = (it->second)[i].second;						//secont value from pair: position of word in file
+			string fileName = wordsDir + (it->first) + wordsFileType;
+			unsigned short int bookPathIndex = (it->second)[i].first; 		//first value from pair: book index in vector of book positions
+			int pos = (it->second)[i].second;						//secont value from pair: position of word in file
 			ofstream wordFileOut(fileName.c_str(), ios::out | ios::binary | ios::app); //file to store book locations and word locations
 			wordFileOut.write((char*)&bookPathIndex, sizeof(unsigned short int));
 			wordFileOut.write((char*)&pos, sizeof(int));
@@ -280,22 +262,10 @@ void Index::WriteMapToFile(){
 	}
 }
 
-BookMap Index::GetLocations(string word)
-{
-	map<string, BookMap>::iterator it;
-	BookMap emptyBookMap;							//returned if word is not found in index
-	
-	it = index.find(word);
-	if(it == index.end())					//word is not found
-		return emptyBookMap;
-	else
-		return index[word];
-}
-
 bool Index::CarefulOpenIn(ifstream& infile, string name)
 {
       infile.open(name.c_str(), ios::binary);			//was getting wrong positions without opening binary
-      if(infile.fail())
+      if(infile.fail())							//return false if there's a problem opening the file
       {
          cout << "\n\n\nThere was an error opening the input file " << name << ".\n\n";
 		 return false;
@@ -336,10 +306,12 @@ void Index::MakeLower(string& word)
 
 bool Index::hasEnding(string const &fullString, string const &ending) 
 {
-	if (fullString.length() >= ending.length()) 
-	{
-		return (0 == fullString.compare (fullString.length() - ending.\
-						 length(), ending.length(), ending));
+	
+	
+	if (fullString.length() >= ending.length()) 				//if the full string has fewer characters than ending, 
+	{															//full string doesn't contain the ending
+		string fullStringEnding = fullString.substr(fullString.length() - ending.length(), ending.length());		//store the ending of fullString
+		return (0 == fullStringEnding.compare (ending));			//compare ending of full string with ending
 	} 
 	else 
 	{
@@ -350,16 +322,16 @@ bool Index::hasEnding(string const &fullString, string const &ending)
 void Index::BuildStopWords()
 {
     string line, word; 
-	ifstream infile("NewStop.txt"); // open the file
+	string filename = "NewStop.txt";
+	ifstream infile(filename); // open the file
     int position = 0; 
     while (!infile.fail()) 
 	{
-        getline(infile, line); // get the next line of code
-        istringstream lineStream(line); // Create a string stream of the line
-        while (lineStream >> word) 
-		{ // get the next word
-            stopWords[word];
-            // push the word and the line position on the vector for this word
+        getline(infile, line); // get each line in file
+        istringstream lineStream(line); 
+        while (lineStream >> word) 			//get each word in line
+		{ 
+            stopWords[word];		// push the word and the line position on the vector for this word
         }
         position = infile.tellg(); // get the poistion of the next line
     }
@@ -369,7 +341,8 @@ bool Index::IsStopWord(string word)
 {
 	map<string, short int>::iterator it;	
 	it = stopWords.find(word);
-    if (it == stopWords.end() || word == "") 
+	
+    if (it == stopWords.end() || word == "") 		//check if word is found in stopWords
 	{
          return false;
     } 
@@ -379,28 +352,18 @@ bool Index::IsStopWord(string word)
     }
 }
 
-
-string Index::GetTitle(ifstream& infile)
-{
-	///////NOT DONE YET////////////////
-	int pos = 0;
-	string line;
-	infile.seekg(pos, infile.beg);
-	getline(infile, line);
-}
-
 void Index::BuildBookPathsMap()
 {
 	ifstream infile;
-	if(CarefulOpenIn(infile, bookDir))
+	if(CarefulOpenIn(infile, bookPathsFile))		//open bookPaths file
 	{
-		bookPaths.clear();
+		bookPaths.clear();				//get rid of any garbage in bookPaths vector
 		string line;
-		while(!infile.eof())
+		while(!infile.eof())			//read through bookPaths file
 		{
 			getline(infile, line);
 			cout << line << endl;
-			bookPaths.push_back(line);
+			bookPaths.push_back(line);			//push each line to bookPaths vector
 		}
 		
 		infile.close();
@@ -416,16 +379,12 @@ void Index::BuildBookPathsMap()
 }
 
 void Index::BuildWordMap(string word)
-{
-	cout << "\n\n\n******************************************************************************\n" 
-		 << "building map for " << word << ". Last word searched for was " << lastWordSearchedFor 
-		 << "\n******************************************************************************\n\n\n";
-	
+{	
 	MakeLower(word);		//normalize word
 	string newFileName = wordsDir+word+wordsFileType;			//get the word file name
 	ifstream wordFile(newFileName.c_str(), ios::in | ios::binary);		//open it to read in binary
 	
-	if(wordFile.fail())		//word doesn't exist, just return
+	if(wordFile.fail())		//if word doesn't exist, just return
 	{
 		cout << "\nNo file for word...\n";
 		return;
@@ -453,8 +412,8 @@ void Index::BuildWordMap(string word)
 
 void Index::BuildBookInfo()
 {
-	const int MAX_LINE_SEARCH = 30;
-	const string infoIntro = "The Project Gutenberg EBook of ";
+	const int MAX_LINE_SEARCH = 30;			//number of lines to search for info at beginning of file
+	const string infoIntro = "The Project Gutenberg EBook of ";			//string that precedes the book info
 	ifstream infile;
 	
 	for(int i = 0; i < bookPaths.size(); i++)		//for each book
@@ -469,8 +428,8 @@ void Index::BuildBookInfo()
 				size_t pos = line.find(infoIntro);
 				if(pos != string::npos)					//check if the line contains the infoIntro: if it does, store it
 				{
-					pos += infoIntro.size();		//move pos past "Title: "
-					bookInfo[i] = line.substr(pos);		//store the title in titles, with the correpsonding bookPath index
+					pos += infoIntro.size();		//move pos past infoIntro
+					bookInfo[i] = line.substr(pos);		//store the info in bookInfos
 				}
 			}
 			infile.close();
@@ -478,21 +437,21 @@ void Index::BuildBookInfo()
 	}
 }
 
-string Index::GetBookInfo(int i)
+string Index::GetBookInfo(int bookIndex)
 {
-	cout << "\nGetting book " << bookPaths.at(i) << endl;
+	cout << "\nGetting book " << bookPaths.at(bookIndex) << endl;
 	
 	map<int, string>::iterator it;	
 	
-	it = bookInfo.find(i);
-    if (it != bookInfo.end())
+	it = bookInfo.find(bookIndex);
+    if (it != bookInfo.end())					//if there is info for that book, send it back
 	{
 		string info = "<br><i><b>";
-		info += bookInfo[i] + ": ";
+		info += bookInfo[bookIndex] + ": ";
 		info += "</i></b>";
         return info;
     } 
-	else 
+	else 						//otherwise, return an empty string
 	{
         return "";
     }
